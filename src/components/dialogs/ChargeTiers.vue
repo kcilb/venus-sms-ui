@@ -205,18 +205,9 @@ function onClickAddTier() {
 
 async function findCurrencyChargeTier() {
   try {
-    let request = <ChargeTiers>{};
-    request.id = null;
-    request.billerCode = billerCode.value;
-    request.minAmount = 0;
-    request.maxAmount = 0;
-    request.tierTaxCharge = null;
-    request.tierVendorCharge = null;
-    request.tierBankCharge = null;
-    request.createDate = '';
-    request.createdBy = '';
-    request.tierDescription = null;
-    await adminStore.findCurrencyChargeTier(arequest);
+    let request = <ChargeTierRequest>{};
+    request.smsAlertCrncyId = 1;
+    await adminStore.findCurrencyChargeTier(request);
     if (adminStore.response.code != "0") {
       alerts.showAlert(adminStore.response)
       return;

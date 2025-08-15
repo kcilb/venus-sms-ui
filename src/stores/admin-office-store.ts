@@ -1,7 +1,7 @@
 import {acceptHMRUpdate, defineStore} from "pinia";
 import {reactive, ref} from "vue";
 import {
-  ApiResponse, ChargeTiers,
+  ApiResponse, ChargeTierRequest, ChargeTiers,
   Response, Roles, SmsAlertCurrency,
   User
 } from "components/models";
@@ -34,7 +34,7 @@ export const useAdminOfficesStore = defineStore('admin', {
 
   actions: {
 
-    async findCurrencyChargeTier(request: SmsAlertCurrency) {
+    async findCurrencyChargeTier(request: ChargeTierRequest) {
       this.apiResponse = {} as any;
       this.currencyList = [];
       this.loading = true;
