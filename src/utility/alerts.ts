@@ -1,6 +1,6 @@
 import {useQuasar} from 'quasar';
 import {Errors, Response} from 'components/models';
-import {useCommonUtility} from "src/utils/common";
+import {useCommonUtility} from "src/utility/common";
 
 
 export function useAlerts() {

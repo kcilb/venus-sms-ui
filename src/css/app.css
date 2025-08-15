@@ -1,1 +1,51 @@
 /* app global css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+.ellipsis-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 230px;
+    display: inline-block;
+}
+
+
+
+/*body {*/
+/*    font-family: 'Baloo 2', sans-serif;*/
+/*    font-size: 15px;*/
+/*}*/
+
+
+.logo-bg {
+    background-image: linear-gradient(120deg, rgba(2, 83, 75, 0.5), #146052 100%), url(assets/images/wave.avif);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-y: 65%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.work-flow-bg {
+    background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.page-content {
+    width: 100%;
+    flex: 1; /* Ensures content fills available space */
+}
+
+
+.unclickable {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+
+

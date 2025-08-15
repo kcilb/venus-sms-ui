@@ -4,30 +4,18 @@
 
       <div class="col-md-6 flex flex-center q-px-xl gt-sm">
         <div class="text-white" style="max-width: 500px">
-          <h3 style="background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+          <h3 style="background: linear-gradient(135deg, #047464 0%, #148c74 100%);
 border-radius: 5px 0px 5px 0px;"
-              class="text-h4 text-weight-medium q-pa-md q-mb-md">Enterprise Treasury</h3>
+              class="text-h4 text-weight-medium q-pa-md q-mb-md">PRIDEBANK / VENUS </h3>
 
-          <div class="q-gutter-y-md">
-            <div class="row items-start">
-              <q-icon name="visibility" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Real-time cash positions</div>
-            </div>
-            <div class="row items-start">
-              <q-icon name="sync_alt" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Automated payment workflows</div>
-            </div>
-            <div class="row items-start">
-              <q-icon name="security" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Secure transactions</div>
-            </div>
+          <div class="pride-logo">
+
           </div>
 
         </div>
       </div>
 
       <div class="col-12 col-md-4">
-
         <q-tab-panels
           style="background: none"
           v-model="panel"
@@ -41,7 +29,6 @@ border-radius: 5px 0px 5px 0px;"
                 <div class="text-h5 text-weight-medium">
                   Login
                 </div>
-                <span class="text-caption text-grey-7 q-mb-sm">Real-time treasury insights | Monitoring | Reporting | Automated reconciliations | End-of-day</span>
               </q-card-section>
 
               <q-card-section>
@@ -96,7 +83,7 @@ border-radius: 5px 0px 5px 0px;"
                     :loading="authStore.loading"
                     class="full-width q-mb-md"
                     size="md"
-                    style="background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+                    style="background: linear-gradient(135deg, rgb(196,148,20) 0%, rgb(196,148,20) 100%);
 color: white"
                   />
 
@@ -111,7 +98,7 @@ color: white"
                   Reset Password
                 </div>
                 <span class="text-caption text-grey-7 q-mb-sm">
-        Secure password reset for treasury accounts
+        Secure password reset
       </span>
               </q-card-section>
 
@@ -136,10 +123,9 @@ color: white"
                     label="Reset"
                     type="submit"
                     no-caps
-                    class="full-width q-mb-md"
+                    class="full-width q-mb-md bg-primary"
                     size="md"
-                    style="color: white;
-                    background: linear-gradient(135deg, #30b54e 0%, #218838 100%);"
+                    style="color: white;"
                     :loading="authStore.loading"
                   />
                   <div class="text-center text-caption">
@@ -270,6 +256,14 @@ async function onReset() {
 </script>
 
 <style scoped>
+
+.pride-logo {
+  background: url('~assets/images/logo.png') no-repeat center center / 100% 100%;
+  min-height: 250px;
+  min-width: 40px;
+  overflow: hidden;
+}
+
 @media (max-width: 1023px) {
   .gt-sm {
     display: none;

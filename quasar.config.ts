@@ -65,7 +65,7 @@ export default defineConfig((/* ctx */) => {
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
-      
+
       // vitePlugins: [
       //   [ 'package-name', { ..pluginOptions.. }, { server: true, client: true } ]
       // ]
@@ -79,7 +79,13 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {},
+      config: {
+        brand: {
+          primary: '#146052',
+          positive: '#c49414',
+          negative: '#fb3a66'
+        }
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
