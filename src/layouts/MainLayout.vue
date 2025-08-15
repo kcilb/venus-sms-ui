@@ -10,7 +10,6 @@
 <script setup lang="ts">
 
 import MenuBar from "components/navigation/MenuBar.vue";
-import AppFooter from "components/AppFooter.vue";
 </script>
 
 
