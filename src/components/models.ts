@@ -72,10 +72,16 @@ export interface ApiResponse<T> {
 }
 
 export interface SmsAlertCurrency {
-  smsAlertCrncyId: number | string;
-  crncyIso: string;
-  crncyId: number;
-  status: 'active' | 'inactive' | 'pending' | 'archived'; // Status with specific values
+  smsAlertCrncyId: number | null;
+  crncyIso: string | null;
+  crncyId: number | null;
+  crncyNm: string | null;
+  status: 'Active' | 'Inactive' | 'Pending';
+  createdBy: string | null;
+  createDt: string | null;
+  modifiedBy: string | null;
+  modifyDt: string | null;
+  itemUuid: string | null
 }
 
 export interface User {
@@ -116,4 +122,24 @@ export interface Roles {
   modifiedBy?: string | null;
   modifyDate?: string | null;
   itemUuid?: string | null;
+}
+
+export interface ChargeTiers {
+  ptId: number | string; // Payment Type ID (can be number or UUID string)
+  chargeDesc: string;    // Description of the charge
+  txnType: string;      // Transaction type (e.g., 'DEPOSIT', 'WITHDRAWAL')
+  minValue: number;     // Minimum applicable value
+  maxValue: number;     // Maximum applicable value
+  vendorCharge: number; // Charge amount for vendor
+  bankCharge: number;   // Charge amount for bank
+  exciseCharge: number; // Government excise charge
+  status: 'Active';
+  modifiedBy: string;   // User who last modified
+  modifiedDate: string | string; // Can be Date object or ISO string
+}
+
+export interface ChargeTierRequest {
+  smsAlertCrncyId: number;
+  tiers: ChargeTiers[];
+  isEdit: boolean;
 }

@@ -4,6 +4,7 @@ import {ref} from "vue";
 export const useDialogStore = defineStore('dialog', {
   state: () => ({
     initializer: ref(false),
+    tiers: ref(false),
   }),
 
   getters: {},

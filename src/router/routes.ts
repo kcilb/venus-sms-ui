@@ -38,6 +38,24 @@ const routes: RouteRecordRaw[] = [
         props: true
       },
 
+      {
+        path: 'currency',
+        component: () => import('pages/admin/SMSCurrency/SMSCurrencyList.vue'),
+        name: 'CurrencyList'
+      },
+      {
+        path: 'currency/:action',
+        component: () => import('pages/admin/SMSCurrency/MaintainSMSCurrency.vue'),
+        name: 'CreateCurrency',
+        props: true
+      },
+      {
+        path: 'currency/:action/:id',
+        component: () => import('pages/admin/SMSCurrency/MaintainSMSCurrency.vue'),
+        name: 'EditCurrency',
+        props: true
+      },
+
     ]
   },
 
