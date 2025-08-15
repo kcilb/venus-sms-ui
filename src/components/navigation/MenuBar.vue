@@ -160,7 +160,6 @@ const menuItems = {
       name: 'Currency & Charges', icon: 'admin_panel_settings', route: '/admin/currency',
       activeRoutes: ['CurrencyList', 'CreateCurrency', 'EditCurrency'], available: true
     },
-
     {
       name: 'Charge', icon: 'business', route: '/admin/branches',
       activeRoutes: ['ChargeHistory'], available: true
