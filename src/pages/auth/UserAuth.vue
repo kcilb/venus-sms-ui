@@ -206,14 +206,15 @@ async function onLogin() {
     let request = {} as AuthRequest;
     request.userName = loginState.value.username;
     request.password = loginState.value.password;
-    await authStore.login(request);
-    if (authStore.response.code !== '00') {
-      alerts.showAlert(authStore.response);
-      return;
-    }
-
-    utility.storeAuthData(authStore.apiResponse.data);
-    dialogStore.initializer = !dialogStore.initializer;
+    await router.push('/admin');
+    // await authStore.login(request);
+    // if (authStore.response.code !== '00') {
+    //   alerts.showAlert(authStore.response);
+    //   return;
+    // }
+    //
+    // utility.storeAuthData(authStore.apiResponse.data);
+    // dialogStore.initializer = !dialogStore.initializer;
     message.value = 'Setting up ...'
 
 

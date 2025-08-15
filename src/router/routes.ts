@@ -17,6 +17,9 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/admin',
     component: () => import('layouts/MainLayout.vue'),
+    children: [
+      {path: '', component: () => import('pages/admin/DashBoard.vue')}
+    ]
   },
 
   // Always leave this as last one,

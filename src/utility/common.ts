@@ -78,6 +78,7 @@ export function useCommonUtility() {
   }
 
   function formatProcessingDate() {
+    if(getAuthData() == null) return moment().format('ddd, MMM DD YYYY');
     return moment(getAuthData().processDate).format('ddd, MMM DD YYYY');
   }
 
