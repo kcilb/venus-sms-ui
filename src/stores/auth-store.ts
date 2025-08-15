@@ -2,7 +2,8 @@ import {defineStore, acceptHMRUpdate} from 'pinia';
 import {api} from "boot/axios";
 import {reactive} from "vue";
 import {ApiResponse, Response, AuthRequest, User, ChangeRequest} from "components/models";
-import {useCommonUtility} from "src/utils/common";
+import {useCommonUtility} from "src/utility/common";
+
 
 const utility = useCommonUtility();
 export const useAuthStore = defineStore('auth', {
@@ -57,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.response = {} as any;
       try {
-        await api.post('auth/changePassword', request, {
+        await api.post('auth/change', request, {
           headers: {
             'Content-Type': 'application/json'
           }

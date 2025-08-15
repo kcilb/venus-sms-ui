@@ -1,4 +1,4 @@
-import {ApiResponse, createDefaultActionData, DealType, Errors, Response, TokenMap} from "components/models";
+import {ApiResponse, Errors, Response, TokenMap} from "components/models";
 import {jwtDecode} from "jwt-decode";
 import CryptoJS from 'crypto-js/index';
 import moment from "moment";
@@ -34,10 +34,6 @@ export function useCommonUtility() {
     if (date == null)
       return '';
     return moment(date).format('DD/MM/YYYY HH:mm:ss A');
-  }
-
-  function formatProcessingDate() {
-    return moment(getAuthData().processDate).format('ddd, MMM DD YYYY');
   }
 
 
@@ -81,6 +77,10 @@ export function useCommonUtility() {
     return `${formattedDate} (${narration})`;
   }
 
+  function formatProcessingDate() {
+    return moment(getAuthData().processDate).format('ddd, MMM DD YYYY');
+  }
+
 
   function storePasswordChangeFlag(val: string) {
     sessionStorage.setItem('changePasswordFlag', val);
@@ -97,6 +97,8 @@ export function useCommonUtility() {
   function getMenuCode() {
     return sessionStorage.getItem('MENU_CODE');
   }
+
+
 
   function getAuthData() {
     return decodeJwt() as TokenMap;
@@ -126,19 +128,6 @@ export function useCommonUtility() {
     return getAuthData() != null;
   }
 
-  // function generateDealReference(dealType: any) {
-  //   const prefixMap = {
-  //     PLACEMENT: 'LN',
-  //     BORROWING: 'DEP',
-  //     FX_SPOT: 'SPT',
-  //     FX_SWAP: 'SWP',
-  //     FX_FORWARD: 'FWD'
-  //   };
-  //
-  //   const prefix = prefixMap[dealType] || 'DFT/Default';
-  //   const randomNum = Math.floor(100000 + Math.random() * 900000);
-  //   return `${prefix}-${randomNum}`;
-  // }
 
   function getDefaultDate() {
     return moment(getAuthData().processDate).format('YYYY-MM-DD')
@@ -154,48 +143,11 @@ export function useCommonUtility() {
 
   function convertResponseMessageObj(response: ApiResponse<any>) {
     let resp = {} as Response
-    resp.code = response.code;
-    resp.message = response.message;
+    resp.code = response.response.code;
+    resp.message = response.response.message;
     return resp;
   }
 
-  function isResolveActionData(route: string | null, workflowId: number, itemId: number, status: string, dealType: string) {
-    const action = createDefaultActionData();
-
-    const isReviewRoute = route === 'review';
-    const isSubmittable = route === 'edit' && itemId != null && status === 'Inactive';
-    const isEditable = route === 'edit' || route === 'add'
-    const stageFlags = {
-      APPROVE: isReviewRoute,
-      DECLINE: isReviewRoute,
-      RETURN: isReviewRoute,
-      SUBMIT: isSubmittable,
-      EDIT: isEditable
-    };
-
-    for (const [key, value] of Object.entries(stageFlags)) {
-      action.isStage.set(key, value);
-    }
-
-    action.workItemId = Number.parseInt(String(workflowId));
-    action.itemId = itemId;
-    action.itemDescription = getDescription(dealType);
-    action.dealType = dealType;
-    return action;
-  }
-
-  function getDescription(dealType: string | undefined): string {
-    const DEAL_TYPE_DESCRIPTIONS: Record<string, string> = {
-      [DealType.FX_FORWARD]: 'FX Forward Submission',
-      [DealType.FX_SWAP]: 'FX Swap Submission',
-      [DealType.FX_SPOT]: 'FX Spot Submission',
-      [DealType.PLACEMENT_BORROWING]: 'Placement and Borrowing Submission',
-      [DealType.BORROWING]: 'Borrowing Submission',
-      [DealType.T_BILL]: 'Treasury Bill Submission',
-      [DealType.T_BOND]: 'Treasury Bond Submission',
-    };
-    return dealType ? DEAL_TYPE_DESCRIPTIONS[dealType] ?? '' : '';
-  }
 
   function getError(err: any) {
     if (err.code === 'ERR_NETWORK') {
@@ -212,27 +164,16 @@ export function useCommonUtility() {
     }
   }
 
-
   return {
-    getError,
-    convertArrayResponseData,
-    convertResponseMessageObj,
-    isResolveActionData,
-    storeAuthData,
-    getTokenData,
     isAuthenticated,
     isPasswordChange,
+    getError,
+    formatProcessingDate,
+    convertResponseMessageObj,
+    storeAuthData,
     storePasswordChangeFlag,
     removePassword,
-    getAuthData,
-    formatToTimestamp,
-    lastLoginDate,
-    getWhen,
-    getMenuCode,
-    getDefaultDate,
-    formatToAmount,
-    formatDate,
-    formatProcessingDate
+    getAuthData
   }
 }
 

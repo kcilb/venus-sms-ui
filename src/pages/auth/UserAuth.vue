@@ -165,18 +165,19 @@ color: white"
 <script setup lang="ts">
 import {onMounted, ref, watch} from "vue";
 import {useRouter} from "vue-router";
-import {AuthRequest, WorkflowRequest} from "components/models";
 import {useAuthStore} from "stores/auth-store";
-import {useAlerts} from "src/utils/alerts";
-import {useCommonUtility} from "src/utils/common";
+import {AuthRequest} from "components/models";
+import {useAlerts} from "src/utility/alerts";
+import {useCommonUtility} from "src/utility/common";
 import InitializerDialog from "components/dialogs/InitializerDialog.vue";
 import {useDialogStore} from "stores/dialog-store";
 
 const router = useRouter()
 const authStore = useAuthStore();
-const utility = useCommonUtility();
 const alerts = useAlerts();
+const utility = useCommonUtility();
 const dialogStore = useDialogStore();
+
 
 const isPwd = ref(true);
 const panel = ref('login')
@@ -224,7 +225,7 @@ async function onLogin() {
       alerts.showAlert(authStore.response);
       return;
     }
-    console.log(authStore.apiResponse.data);
+
     utility.storeAuthData(authStore.apiResponse.data);
     dialogStore.initializer = !dialogStore.initializer;
     message.value = 'Setting up ...'

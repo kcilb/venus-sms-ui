@@ -14,12 +14,12 @@
 
       <div class="q-gutter-sm row items-center no-wrap">
         <q-chip color="white" outline>Process Date: {{ utility.formatProcessingDate() }}</q-chip>
-        <q-btn v-if="utility.getMenuCode() == 'BLOTTERS'" dense flat round
-               @click="router.push('/blotters/workflow-items')" icon="notifications">
-          <q-badge rounded color="red" floating transparent>
-            {{ workflowStore.workflowItems.length }}
-          </q-badge>
-        </q-btn>
+        <!--        <q-btn v-if="utility.getMenuCode() == 'BLOTTERS'" dense flat round-->
+        <!--               @click="router.push('/blotters/workflow-items')" icon="notifications">-->
+        <!--          <q-badge rounded color="red" floating transparent>-->
+        <!--            {{ workflowStore.workflowItems.length }}-->
+        <!--          </q-badge>-->
+        <!--        </q-btn>-->
         <q-btn-dropdown dropdown-icon="expand_more" flat dense no-caps>
           <template v-slot:label>
             <div class="row items-center no-wrap">
@@ -126,27 +126,19 @@
 <script setup lang="ts">
 import {computed, onMounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from "vue-router";
-import {useCommonUtility} from "src/utils/common";
-import {useWorkFlowStore} from "stores/workflow-store";
 import InitializerDialog from "components/dialogs/InitializerDialog.vue";
 import {useDialogStore} from "stores/dialog-store";
-import {WorkflowRequest} from "components/models";
+import {useCommonUtility} from "src/utility/common";
 
-const workflowStore = useWorkFlowStore();
 const router = useRouter();
 const route = useRoute();
 const leftDrawerOpen = ref(true);
 const isMiniMode = ref(false);
 const utility = useCommonUtility();
 const dialogStore = useDialogStore();
-const workFlowStore = useWorkFlowStore();
 
 
 onMounted(() => {
-  if (router.currentRoute.value.fullPath.includes('blotters')) {
-    isMiniMode.value = true;
-    findPendingWorkFlowItems();
-  }
 })
 
 
@@ -157,222 +149,28 @@ const menuItems = {
       activeRoutes: ['Dashboard'], available: true
     },
     {
-      name: 'Approval Route', icon: 'admin_panel_settings', route: '/admin/approval-routes',
-      activeRoutes: ['RouteList', 'CreateRoute', 'EditRoute'], available: true
+      name: 'User', icon: 'admin_panel_settings', route: '/admin/users',
+      activeRoutes: ['UserList', 'CreateUser', 'EditUser'], available: true
     },
     {
       name: 'Roles', icon: 'admin_panel_settings', route: '/admin/roles',
       activeRoutes: ['RoleList', 'CreateRole', 'EditRole'], available: true
     },
     {
-      name: 'Branch', icon: 'business', route: '/admin/branches',
-      activeRoutes: ['BranchList'], available: true
+      name: 'Alerts', icon: 'admin_panel_settings', route: '/admin/alerts',
+      activeRoutes: ['AlertList', 'CreateAlert', 'EditAlert'], available: true
     },
     {
-      name: 'Dealers', icon: 'supervisor_account', route: '/admin/users',
-      activeRoutes: ['UserList', 'CreateUser', 'EditUser'], available: true
-    },
-    {
-      name: 'Books', icon: 'menu_book', route: '/admin/books',
-      activeRoutes: ['BookList', 'CreateBook', 'EditBook'], available: true
-    },
-    {
-      name: 'Brokers', icon: 'business_center', route: '/admin/brokers',
-      activeRoutes: ['BrokerList', 'CreateBroker', 'EditBroker'], available: true
-    },
-    {
-      name: 'Counterparty Definition', icon: 'account_balance', route: '/admin/counter-party-definitions',
-      activeRoutes: ['CounterPartyList', 'CreateCounterParty', 'EditCounterParty'], available: true
-    },
-    {
-      name: 'Currency', icon: 'attach_money', route: '/admin/currency',
+      name: 'Currency & Charges', icon: 'admin_panel_settings', route: '/admin/currency',
       activeRoutes: ['CurrencyList', 'CreateCurrency', 'EditCurrency'], available: true
     },
-    {
-      name: 'Currency Holiday', icon: 'event_busy', route: '/admin/currency-holiday',
-      activeRoutes: ['CurrencyHolidayList', 'CreateCurrencyHoliday', 'EditCurrencyHoliday'], available: true
-    },
-    {
-      name: 'Exchange Rate', icon: 'currency_exchange', route: '/admin/exchange-rates',
-      activeRoutes: ['ExchangeRateList', 'CreateExchangeRate', 'EditExchangeRate'], available: true
-    },
-    {
-      name: 'Currency Pairs', icon: 'currency_exchange', route: '/admin/currency-pairs',
-      activeRoutes: ['CurrencyPairList', 'CreateCurrencyPair', 'EditCurrencyPair'], available: true
-    },
-    {
-      name: 'Trade Limits', icon: 'trending_up', route: '/admin/trade-limits',
-      activeRoutes: ['TradeLimitList', 'CreateTradeLimit', 'EditTradeLimit'], available: true
-    },
-    {
-      name: 'Dealing Parameters', icon: 'tune', route: '/admin/dealing-parameters',
-      activeRoutes: ['DealingParamList', 'CreateDealingParam', 'EditDealingParam'], available: true
-    },
-    {
-      name: 'Nostro Account', icon: 'account_balance_wallet', route: '/admin/nostro-settlement-accounts',
-      activeRoutes: ['NostroAccountList', 'NostroAccountCreate', 'NostroAccountEdit'], available: true
-    },
 
     {
-      name: 'Tax Rate', icon: 'percent', route: '/admin/tax-rates',
-      activeRoutes: ['TaxRateList', 'CreateTaxRate', 'EditTaxRate'], available: true
-    },
-    {name: 'Audit Logs', icon: 'history', route: '/admin/audit-logs', available: true}
-  ],
-  FRONT_OFFICE: [
-    {
-      name: 'Dashboard',
-      icon: 'dashboard',
-      route: '/front-office',
-      activeRoutes: ['FrontOffice'], available: true
-    },
-
-    {
-      name: 'Discounted Deposit',
-      icon: 'account_balance_wallet',
-      route: '/front-office/discounted-deposit',
-      activeRoutes: ['DiscountedDeposit', 'DiscountedDepositCreate', 'DiscountedDepositEdit'], available: false
-    },
-    {
-      name: 'Forward Rate Agreement',
-      icon: 'timeline',
-      route: '/front-office/forward-rate-agreement',
-      activeRoutes: ['ForwardRateAgreement', 'ForwardRateAgreementCreate', 'ForwardRateAgreementEdit'], available: false
-    },
-    {
-      name: 'Fx Forward',
-      icon: 'trending_flat',
-      route: '/front-office/fx-forward',
-      activeRoutes: ['FxForward', 'FxForwardCreate', 'FxForwardEdit'], available: true
-    },
-    {
-      name: 'Fx Spot',
-      icon: 'bolt',
-      route: '/front-office/fx-spot',
-      activeRoutes: ['FxSpot', 'FxSpotCreate', 'FxSpotEdit'], available: true
-    },
-    {
-      name: 'Fx Swap',
-      icon: 'sync_alt',
-      route: '/front-office/fx-swap',
-      activeRoutes: ['FxSwap', 'FxSwapCreate', 'FxSwapEdit'], available: true
-    },
-    {
-      name: 'Certificate Of Deposit',
-      icon: 'verified',
-      route: '/front-office/negotiable-certificate-of-deposit',
-      activeRoutes: ['NegotiableCertificateOfDeposit', 'NegotiableCertificateOfDepositCreate', 'NegotiableCertificateOfDepositEdit']
-      , available: false
-    },
-    {
-      name: 'Placement And Borrowings',
-      icon: 'account_balance',
-      route: '/front-office/placement-and-borrowing',
-      activeRoutes: ['PlacementAndBorrowing', 'PlacementAndBorrowingCreate', 'PlacementAndBorrowingEdit'],
-      available: true
-    },
-    {
-      name: 'Repurchase Agreement',
-      icon: 'autorenew',
-      route: '/front-office/repurchase-agreement',
-      activeRoutes: ['RepurchaseAgreement', 'RepurchaseAgreementCreate', 'RepurchaseAgreementEdit'], available: false
-    },
-    {
-      name: 'Scheduled Deposit',
-      icon: 'schedule',
-      route: '/front-office/scheduled-deposit',
-      activeRoutes: ['ScheduledDeposit', 'ScheduledDepositCreate', 'ScheduledDepositEdit'], available: false
-    },
-    {
-      name: 'Security Deal',
-      icon: 'security',
-      route: '/front-office/security-deal',
-      activeRoutes: ['SecurityDeal', 'SecurityDealCreate', 'SecurityDealEdit'], available: false
-    },
-    {
-      name: 'Security Position',
-      icon: 'shield',
-      route: '/front-office/security-position',
-      activeRoutes: ['SecurityPosition', 'SecurityPositionCreate', 'SecurityPositionEdit'], available: true
-    },
-
-  ],
-  BACK_OFFICE: [
-    {
-      name: 'Dashboard', icon: 'space_dashboard', route: '/back-office',
-      activeRoutes: ['BackOffice'], available: true
-    },
-    {
-      name: 'RTGS', icon: 'account_balance', route: '/back-office/rtgs',
-      activeRoutes: ['RTGS', 'RTGSCreate', 'RTGSEdit'], available: false
-    },
-    {
-      name: 'Letters', icon: 'mark_email_read', route: '/back-office/letters',
-      activeRoutes: ['Letters', 'LetterCreate', 'LetterEdit'], available: false
-    },
-    {
-      name: 'Swift', icon: 'compare_arrows', route: '/back-office/swift',
-      activeRoutes: ['Swift', 'SwiftCreate', 'SwiftEdit'], available: false
+      name: 'Charge', icon: 'business', route: '/admin/branches',
+      activeRoutes: ['ChargeHistory'], available: true
     },
   ],
 
-  MIDDLE_OFFICE: [
-    {
-      name: 'Dashboard', icon: 'space_dashboard', route: '/middle-office',
-      activeRoutes: ['MiddleOffice'], available: true
-    },
-    {
-      name: 'Nostro Balances', icon: 'account_balance_wallet', route: '/middle-office/nostro-balances',
-      activeRoutes: ['NostroBalance', 'NostroBalanceView'], available: true
-    },
-    {
-      name: 'Security Definition', icon: 'security', route: '/middle-office/security-definitions',
-      activeRoutes: ['DefinitionList', 'CreateDefinition', 'EditDefinition'], available: true
-    },
-    {
-      name: 'Trade / Deal Entry Profile', icon: 'view_timeline', route: '/middle-office/trade-profiles',
-      activeRoutes: ['ProfileList', 'ProfileCreate', 'ProfileEdit'], available: true
-    },
-    {
-      name: 'Country Limits', icon: 'public', route: '/middle-office/country-limits',
-      activeRoutes: ['CountryLimit', 'CountryLimitCreate', 'CountryLimitEdit'], available: true
-    },
-    {
-      name: 'Fixing', icon: 'gavel', route: '/middle-office/fixings',
-      activeRoutes: ['Fixing', 'FixingCreate', 'FixingEdit'], available: true
-    },
-    {
-      name: 'Mark to Market', icon: 'show_chart', route: '/middle-office/mark-to-market-history',
-      activeRoutes: ['MTM', 'MTMCreate', 'MTMEdit'], available: true
-    },
-    {
-      name: 'Rate Index', icon: 'bar_chart', route: '/middle-office/rate-index',
-      activeRoutes: ['RateIndex', 'RateIndexCreate', 'RateIndexEdit'], available: true
-    },
-    {
-      name: 'Security Rate', icon: 'trending_up', route: '/middle-office/security-rate',
-      activeRoutes: ['SecurityRate', 'SecurityRateCreate', 'SecurityRateEdit'], available: true
-    },
-  ],
-
-  BLOTTERS: [
-    {
-      name: 'Deals List', icon: 'format_list_numbered', route: '/blotters/deals-list',
-      activeRoutes: ['Deals', 'DealDetail'], available: true
-    },
-    {
-      name: 'Pending Approval',
-      icon: 'view_timeline',
-      route: '/blotters/workflow-items',
-      activeRoutes: ['WorkFlow', 'WorkFlowFx', 'WorkFlowSpot', 'WorkFlowSwap', 'WorkFlowPANDB', 'WorkFlowTB'],
-      available: true
-    },
-    {
-      name: 'Reports', icon: 'add_chart', route: '/blotters/reports',
-      activeRoutes: ['Report'], available: true
-    },
-
-  ]
 };
 
 
@@ -421,19 +219,6 @@ function processStage() {
 }
 
 
-async function findPendingWorkFlowItems() {
-  try {
-    let request = {} as WorkflowRequest;
-    request.userRoleId = utility.getAuthData().userRoleId;
-    request.loginId = utility.getAuthData().loginId;
-    await workFlowStore.findPendingWorkFlowItem(request);
-    if (workFlowStore.response.code !== '00') {
-      return;
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
 </script>
 
 <style scoped>
