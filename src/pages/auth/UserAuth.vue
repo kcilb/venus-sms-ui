@@ -6,7 +6,7 @@
         <div class="text-white" style="max-width: 500px">
           <h3 style="background: linear-gradient(135deg, #047464 0%, #148c74 100%);
 border-radius: 5px 0px 5px 0px;"
-              class="text-h4 text-weight-medium q-pa-md q-mb-md">PRIDEBANK / VENUS </h3>
+              class="text-h4 text-weight-medium q-pa-md q-mb-md">PRIDEBANK / VENUS</h3>
 
           <div class="pride-logo">
 

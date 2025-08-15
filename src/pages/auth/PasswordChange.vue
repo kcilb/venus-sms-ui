@@ -4,24 +4,24 @@
 
       <div class="col-md-6 flex flex-center q-px-xl gt-sm">
         <div class="text-white" style="max-width: 500px">
-          <h3 style="background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+          <h3 style="background: linear-gradient(135deg, #047464 0%, #148c74 100%);
 border-radius: 5px 0px 5px 0px;"
-              class="text-h4 text-weight-medium q-pa-md q-mb-md">Enterprise Treasury</h3>
+              class="text-h4 text-weight-medium q-pa-md q-mb-md">PRIDEBANK / VENUS</h3>
 
-          <div class="q-gutter-y-md">
-            <div class="row items-start">
-              <q-icon name="visibility" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Real-time cash positions</div>
-            </div>
-            <div class="row items-start">
-              <q-icon name="sync_alt" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Automated payment workflows</div>
-            </div>
-            <div class="row items-start">
-              <q-icon name="security" size="10" class="q-mr-sm q-mt-xs"/>
-              <div>Secure transactions</div>
-            </div>
-          </div>
+<!--          <div class="q-gutter-y-md">-->
+<!--            <div class="row items-start">-->
+<!--              <q-icon name="visibility" size="10" class="q-mr-sm q-mt-xs"/>-->
+<!--              <div>Real-time cash positions</div>-->
+<!--            </div>-->
+<!--            <div class="row items-start">-->
+<!--              <q-icon name="sync_alt" size="10" class="q-mr-sm q-mt-xs"/>-->
+<!--              <div>Automated payment workflows</div>-->
+<!--            </div>-->
+<!--            <div class="row items-start">-->
+<!--              <q-icon name="security" size="10" class="q-mr-sm q-mt-xs"/>-->
+<!--              <div>Secure transactions</div>-->
+<!--            </div>-->
+<!--          </div>-->
 
         </div>
       </div>
@@ -41,7 +41,7 @@ border-radius: 5px 0px 5px 0px;"
                 <div class="text-h5 text-weight-medium">
                   Change Password
                 </div>
-                <span class="text-caption text-grey-7 q-mb-sm">Real-time treasury insights | Monitoring | Reporting | Automated reconciliations | End-of-day</span>
+<!--                <span class="text-caption text-grey-7 q-mb-sm">Real-time treasury insights | Monitoring | Reporting | Automated reconciliations | End-of-day</span>-->
               </q-card-section>
 
               <q-card-section>
@@ -114,7 +114,7 @@ border-radius: 5px 0px 5px 0px;"
                     type="submit"
                     class="full-width q-mb-sm"
                     size="md"
-                    style="background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+                    style="background: linear-gradient(135deg, #047464 0%, #059580 100%);
 color: white"
                   />
 
@@ -141,8 +141,9 @@ import {ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {AuthRequest, ChangeRequest} from "components/models";
 import {useAuthStore} from "stores/auth-store";
-import {useCommonUtility} from "src/utils/common";
-import {useAlerts} from "src/utils/alerts";
+import {useCommonUtility} from "src/utility/common";
+import {useAlerts} from "src/utility/alerts";
+
 
 const router = useRouter()
 const authStore = useAuthStore();
