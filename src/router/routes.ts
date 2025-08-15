@@ -18,7 +18,26 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      {path: '', component: () => import('pages/admin/DashBoard.vue'), name: 'Dashboard'}
+      {path: '', component: () => import('pages/admin/DashBoard.vue'), name: 'Dashboard'},
+      {path: 'roles', component: () => import('pages/admin/roles/RoleList.vue'), name: 'RoleList'},
+      {
+        path: 'role/:action', component: () => import('pages/admin/roles/MaintainRole.vue'), name: 'CreateRole',
+        props: true
+      },
+      {
+        path: 'role/:action/:id', component: () => import('pages/admin/roles/MaintainRole.vue'), name: 'EditRole',
+        props: true
+      },
+      {path: 'users', component: () => import('pages/admin/users/UserList.vue'), name: 'UserList'},
+      {
+        path: 'user/:action', component: () => import('pages/admin/users/MaintainUser.vue'), name: 'CreateUser',
+        props: true
+      },
+      {
+        path: 'user/:action/:id', component: () => import('pages/admin/users/MaintainUser.vue'), name: 'EditUser',
+        props: true
+      },
+
     ]
   },
 

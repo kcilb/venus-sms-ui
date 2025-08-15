@@ -171,9 +171,11 @@ export function useCommonUtility() {
     getError,
     formatProcessingDate,
     convertResponseMessageObj,
+    convertArrayResponseData,
     storeAuthData,
     storePasswordChangeFlag,
     removePassword,
+    formatDate,
     getAuthData
   }
 }

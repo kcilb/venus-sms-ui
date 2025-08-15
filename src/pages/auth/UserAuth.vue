@@ -206,7 +206,7 @@ async function onLogin() {
     let request = {} as AuthRequest;
     request.userName = loginState.value.username;
     request.password = loginState.value.password;
-    await router.push('admin');
+    await router.push('/admin');
     // await authStore.login(request);
     // if (authStore.response.code !== '00') {
     //   alerts.showAlert(authStore.response);

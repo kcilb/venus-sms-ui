@@ -1,199 +1,154 @@
 <template>
   <q-page class="q-pa-lg">
+    <div class="row items-center q-mb-lg">
+      <div class="col">
+        <div class="text-h4 text-weight-medium text-primary">Dashboard</div>
+        <div class="text-subtitle2 text-grey-7">Overview of your alert service metrics</div>
+      </div>
+      <div class="col-auto">
+        <q-btn
+          flat
+          round
+          dense
+          icon="refresh"
+          color="grey-7"
+          @click="refreshData"
+        >
+          <q-tooltip>Refresh Data</q-tooltip>
+        </q-btn>
+      </div>
+    </div>
+
     <div class="row q-col-gutter-lg">
-      <!-- Summary Cards -->
-      <div class="col-12 col-md-3">
-        <q-card flat bordered class="summary-card bg-white">
-          <q-card-section class="q-pa-md">
-            <div class="text-subtitle2 text-grey-7">Total Balance</div>
-            <div class="text-h4 text-weight-bold q-mt-sm">245,382</div>
-            <q-icon
-              name="account_balance"
-              size="md"
-              color="primary"
-              class="absolute-top-right q-ma-md bg-blue-1 rounded-borders"
-              style="padding: 8px;"
+      <div class="col-md-3 col-sm-6 col-xs-12">
+        <q-card class="stat-card shadow-3">
+          <q-card-section class="bg-blue-grey-1">
+            <div class="text-subtitle1 text-grey-8">Users</div>
+            <div class="text-h3 text-weight-bold q-mt-sm text-blue-grey-10">1,254</div>
+          </q-card-section>
+          <q-separator/>
+          <q-card-actions align="right" class="q-px-md">
+            <q-btn
+              unelevated
+              color="blue-grey-7"
+              label="Manage"
+              to="/users"
+              size="sm"
+              class="text-capitalize"
             />
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pa-sm text-caption text-grey-7">
-            <q-icon name="info" size="xs" class="q-mr-xs" />
-            Across all accounts
-          </q-card-section>
+          </q-card-actions>
         </q-card>
       </div>
 
-      <div class="col-12 col-md-3">
-        <q-card flat bordered class="summary-card bg-white">
-          <q-card-section class="q-pa-md">
-            <div class="text-subtitle2 text-grey-7">Monthly Income</div>
-            <div class="text-h4 text-weight-bold text-green q-mt-sm">48,750</div>
-            <q-icon
-              name="trending_up"
-              size="md"
-              color="green"
-              class="absolute-top-right q-ma-md bg-green-1 rounded-borders"
-              style="padding: 8px;"
+      <div class="col-md-3 col-sm-6 col-xs-12">
+        <q-card class="stat-card shadow-3">
+          <q-card-section class="bg-cyan-1">
+            <div class="text-subtitle1 text-grey-8">Alerts</div>
+            <div class="text-h3 text-weight-bold q-mt-sm text-cyan-10">432</div>
+          </q-card-section>
+          <q-separator/>
+          <q-card-actions align="right" class="q-px-md">
+            <q-btn
+              unelevated
+              color="cyan-8"
+              label="Manage"
+              to="/alerts"
+              size="sm"
+              class="text-capitalize"
             />
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pa-sm text-caption text-grey-7">
-            <q-icon name="info" size="xs" class="q-mr-xs" />
-            12% increase from last month
-          </q-card-section>
+          </q-card-actions>
         </q-card>
       </div>
 
-      <div class="col-12 col-md-3">
-        <q-card flat bordered class="summary-card bg-white">
-          <q-card-section class="q-pa-md">
-            <div class="text-subtitle2 text-grey-7">Monthly Expenses</div>
-            <div class="text-h4 text-weight-bold text-orange q-mt-sm">32,190</div>
-            <q-icon
-              name="trending_down"
-              size="md"
-              color="orange"
-              class="absolute-top-right q-ma-md bg-orange-1 rounded-borders"
-              style="padding: 8px;"
+      <div class="col-md-3 col-sm-6 col-xs-12">
+        <q-card class="stat-card shadow-3">
+          <q-card-section class="bg-orange-1">
+            <div class="text-subtitle1 text-grey-8">Pending Charges</div>
+            <div class="text-h3 text-weight-bold q-mt-sm text-orange-10">87</div>
+          </q-card-section>
+          <q-separator/>
+          <q-card-actions align="right" class="q-px-md">
+            <q-btn
+              unelevated
+              color="orange-8"
+              label="Run Now"
+              to="/run-charges"
+              size="sm"
+              class="text-capitalize"
             />
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pa-sm text-caption text-grey-7">
-            <q-icon name="info" size="xs" class="q-mr-xs" />
-            8% decrease from last month
-          </q-card-section>
+          </q-card-actions>
         </q-card>
       </div>
 
-      <div class="col-12 col-md-3">
-        <q-card flat bordered class="summary-card bg-white">
-          <q-card-section class="q-pa-md">
-            <div class="text-subtitle2 text-grey-7">Pending Approvals</div>
-            <div class="text-h4 text-weight-bold text-purple q-mt-sm">12</div>
-            <q-icon
-              name="pending_actions"
-              size="md"
-              color="purple"
-              class="absolute-top-right q-ma-md bg-purple-1 rounded-borders"
-              style="padding: 8px;"
+      <div class="col-md-3 col-sm-6 col-xs-12">
+        <q-card class="stat-card shadow-3">
+          <q-card-section class="bg-purple-1">
+            <div class="text-subtitle1 text-grey-8">Today's Sent Messages</div>
+            <div class="text-h3 text-weight-bold q-mt-sm text-purple-10">56</div>
+          </q-card-section>
+          <q-separator/>
+          <q-card-actions align="right" class="q-px-md">
+            <q-btn
+              unelevated
+              color="purple-8"
+              label="View"
+              to="/audit"
+              size="sm"
+              class="text-capitalize"
             />
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pa-sm text-caption text-grey-7">
-            <q-icon name="info" size="xs" class="q-mr-xs" />
-            5 require immediate attention
-          </q-card-section>
+          </q-card-actions>
         </q-card>
       </div>
+    </div>
 
-      <!-- Charts Row -->
-      <div class="col-12 col-md-8">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="text-h6 text-weight-medium">Cash Flow</div>
-              <q-space />
-              <q-btn-toggle
-                v-model="chartPeriod"
-                toggle-color="primary"
-                :options="[
-                  {label: 'Weekly', value: 'week'},
-                  {label: 'Monthly', value: 'month'},
-                  {label: 'Quarterly', value: 'quarter'}
-                ]"
-                dense
-                flat
-              />
-            </div>
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pt-none">
-            <div class="chart-container" style="height: 300px;">
-              <!-- Chart would go here -->
-              <div class="flex flex-center full-height text-grey-5">
-                <q-icon name="insert_chart" size="xl" />
-                <div class="q-ml-sm">Cash Flow Visualization</div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="text-h6 text-weight-medium">Budget Allocation</div>
-          </q-card-section>
-          <q-separator />
-          <q-card-section class="q-pt-none">
-            <div class="chart-container" style="height: 300px;">
-              <!-- Chart would go here -->
-              <div class="flex flex-center full-height text-grey-5">
-                <q-icon name="pie_chart" size="xl" />
-                <div class="q-ml-sm">Budget Breakdown</div>
-              </div>
-            </div>
-          </q-card-section>
-          <q-separator />
-        </q-card>
-      </div>
-
-      <!-- Recent Transactions -->
+    <div class="row q-mt-lg">
       <div class="col-12">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
+        <q-card flat bordered class="shadow-1">
+          <q-card-section class="q-pa-md">
             <div class="row items-center">
-              <div class="text-h6 text-weight-medium">Recent Transactions</div>
-              <q-space />
-              <q-btn
-                flat
-                color="primary"
-                label="View All"
-                to="/transactions"
-                icon-right="chevron_right"
-              />
+              <div class="col">
+                <div class="text-h5 text-weight-medium">Recent Activities</div>
+              </div>
+              <div class="col-auto">
+                <q-btn
+                  flat
+                  dense
+                  color="primary"
+                  label="View All"
+                  to="/activities"
+                  size="sm"
+                />
+              </div>
             </div>
           </q-card-section>
 
-          <q-separator />
+          <q-separator/>
 
           <q-card-section class="q-pa-none">
             <q-table
-              :rows="recentTransactions"
-              :columns="transactionColumns"
-              row-key="id"
               flat
               bordered
-              hide-pagination
-              :rows-per-page-options="[0]"
-              class="transactions-table"
+              :rows="recentActivities"
+              :columns="activityColumns"
+              row-key="id"
+              :rows-per-page-options="[5, 10]"
+              :pagination="{ rowsPerPage: 5 }"
+              hide-bottom
+              class="no-shadow"
             >
-              <template v-slot:body-cell-date="props">
-                <q-td :props="props">
-                  <div class="text-weight-medium">{{ formatDate(props.row.date) }}</div>
-                </q-td>
-              </template>
-
               <template v-slot:body-cell-status="props">
                 <q-td :props="props">
                   <q-badge
-                    :color="getStatusColor(props.row.status)"
-                    class="q-px-sm q-py-xs"
-                    :class="`text-${getStatusColor(props.row.status)}`"
-                  >
-                    {{ capitalizeFirstLetter(props.row.status) }}
-                  </q-badge>
+                    :color="statusColor(props.value)"
+                    :label="props.value"
+                    class="text-capitalize"
+                  />
                 </q-td>
               </template>
 
-              <template v-slot:body-cell-amount="props">
+              <template v-slot:body-cell-time="props">
                 <q-td :props="props">
-                  <span
-                    :class="`text-${props.row.type === 'income' ? 'green' : 'red'}`"
-                    class="text-weight-medium"
-                  >
-                    {{ props.row.type === 'income' ? '+' : '-' }}${{ props.row.amount }}
-                  </span>
+                  <div class="text-caption">{{ utility.formatDate(props.value) }}</div>
                 </q-td>
               </template>
             </q-table>
@@ -205,87 +160,70 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {ref} from 'vue';
+import {useCommonUtility} from "src/utility/common";
 
-const chartPeriod = ref('month');
-const recentTransactions = ref([
+const utility = useCommonUtility();
+
+const leftDrawerOpen = ref(false);
+
+const recentActivities = ref([
   {
     id: 1,
-    date: '2023-05-15',
-    description: 'Vendor Payment - Office Supplies',
-    account: 'Operating Account',
-    amount: '1,250.00',
-    type: 'expense',
-    status: 'completed',
-    category: 'Office Expenses'
+    action: 'User Login',
+    user: 'admin@example.com',
+    time: '2023-05-15 09:23:45',
+    status: 'Success'
   },
   {
     id: 2,
-    date: '2023-05-14',
-    description: 'Client Payment - Project X',
-    account: 'Client Receivables',
-    amount: '5,800.00',
-    type: 'income',
-    status: 'completed',
-    category: 'Services'
+    action: 'Alert Sent',
+    user: 'system',
+    time: '2023-05-15 08:45:12',
+    status: 'Success'
   },
   {
     id: 3,
-    date: '2023-05-13',
-    description: 'Bank Transfer - Savings',
-    account: 'Main Account',
-    amount: '2,000.00',
-    type: 'expense',
-    status: 'pending',
-    category: 'Transfers'
+    action: 'Charge Run',
+    user: 'finance@example.com',
+    time: '2023-05-15 08:30:00',
+    status: 'Completed'
   },
   {
     id: 4,
-    date: '2023-05-12',
-    description: 'Utility Bill - Electricity',
-    account: 'Operating Account',
-    amount: '450.00',
-    type: 'expense',
-    status: 'completed',
-    category: 'Utilities'
+    action: 'Role Updated',
+    user: 'admin@example.com',
+    time: '2023-05-14 17:12:33',
+    status: 'Success'
   },
   {
     id: 5,
-    date: '2023-05-10',
-    description: 'Consulting Fee',
-    account: 'Operating Account',
-    amount: '3,200.00',
-    type: 'income',
-    status: 'completed',
-    category: 'Services'
+    action: 'Failed Login',
+    user: 'unknown@example.com',
+    time: '2023-05-14 16:45:21',
+    status: 'Failed'
   }
 ]);
 
-const transactionColumns = [
-  { name: 'date', label: 'Date', field: 'date', align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'account', label: 'Account', field: 'account', align: 'left' },
-  { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
-  { name: 'status', label: 'Status', field: 'status', align: 'center' }
-];
+const activityColumns = ref([
+  {name: 'action', label: 'Action', field: 'action', align: 'left'},
+  {name: 'user', label: 'User', field: 'user', align: 'left'},
+  {name: 'time', label: 'Time', field: 'time', align: 'left'},
+  {name: 'status', label: 'Status', field: 'status', align: 'left'}
+]);
 
-function getStatusColor(status: string) {
-  return {
-    'completed': 'green',
+function statusColor(status: string) {
+  const colors = {
+    'success': 'green',
+    'completed': 'blue',
     'pending': 'orange',
-    'rejected': 'red'
-  }[status] || 'grey';
+    'failed': 'red'
+  };
+  return colors[status.toLowerCase()] || 'grey';
 }
 
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+function refreshData() {
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  });
 }
 </script>
 

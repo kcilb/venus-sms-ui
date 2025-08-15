@@ -71,6 +71,13 @@ export interface ApiResponse<T> {
   response: Response
 }
 
+export interface SmsAlertCurrency {
+  smsAlertCrncyId: number | string;
+  crncyIso: string;
+  crncyId: number;
+  status: 'active' | 'inactive' | 'pending' | 'archived'; // Status with specific values
+}
+
 export interface User {
   userId?: number | null;
   loginId?: string | null;
@@ -91,6 +98,19 @@ export interface User {
   passwordChangedFlag?: string | null;
   passwordExpiryDate?: string | null;
   lastLogonDate?: string | null;
+  createdBy?: string | null;
+  createDate?: string | null;
+  modifiedBy?: string | null;
+  modifyDate?: string | null;
+  itemUuid?: string | null;
+}
+
+export interface Roles {
+  userRoleId?: number | null;
+  description?: string | null;
+  maximumFailedLogins: string | null;
+  daysForPasswordChange: string | null;
+  status?: string | null;
   createdBy?: string | null;
   createDate?: string | null;
   modifiedBy?: string | null;

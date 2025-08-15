@@ -1,5 +1,6 @@
 <template>
-  <q-header elevated style=" background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);" class="text-white">
+  <q-header elevated style=" background: linear-gradient(135deg, rgba(2, 83, 75, 0.5) 0%, #146052 100%);"
+            class="text-white">
     <q-toolbar>
       <q-btn
         flat
@@ -75,8 +76,8 @@
             class="sidebar-header-icon"
           />
           <div v-if="!isMiniMode" class="q-ml-sm">
-            <div class="text-h6 text-weight-bold">Treasury</div>
-            <div class="text-caption text-grey-6">v1.0.0</div>
+            <div class="text-h6 text-weight-bold">Venus Alerts</div>
+            <div class="text-caption text-grey-6">v2.0.0</div>
           </div>
         </div>
       </div>
@@ -86,7 +87,7 @@
 
       <q-list padding class="menu-list">
         <q-item
-          v-for="item in menuItems[menuCode]"
+          v-for="item in menuItems"
           :key="item.name"
           :active="isRouteActive(item)"
           :active-class="'active-menu-item'"
@@ -103,16 +104,13 @@
 
           <q-item-section v-show="!isMiniMode">
             {{ item.name }}
+            <q-item-label caption>{{ item.subtitle }}</q-item-label>
           </q-item-section>
 
           <q-tooltip v-if="isMiniMode" anchor="center right" self="center left" :offset="[10, 10]">
             {{ item.name }}
           </q-tooltip>
 
-          <q-tooltip v-if="!item.available" anchor="center right" self="center left" :offset="[10, 10]">
-            {{ item.name }}
-            <span v-if="!item.available"> (Coming Soon)</span>
-          </q-tooltip>
 
         </q-item>
       </q-list>
@@ -138,35 +136,48 @@ const utility = useCommonUtility();
 const dialogStore = useDialogStore();
 
 
-const menuItems = {
-  ADMIN: [
+const menuItems =
+  [
     {
       name: 'Dashboard', icon: 'dashboard', route: '/admin',
-      activeRoutes: ['Dashboard'], available: true
+      activeRoutes: ['Dashboard'], available: true, subtitle: 'statistics'
     },
     {
-      name: 'User', icon: 'admin_panel_settings', route: '/admin/users',
+      name: 'Users', icon: 'group', route: '/admin/users',
       activeRoutes: ['UserList', 'CreateUser', 'EditUser'], available: true
+      , subtitle: 'set up users'
     },
     {
-      name: 'Roles', icon: 'admin_panel_settings', route: '/admin/roles',
+      name: 'Roles', icon: 'add_moderator', route: '/admin/roles',
       activeRoutes: ['RoleList', 'CreateRole', 'EditRole'], available: true
+      , subtitle: 'set up application roles'
     },
     {
-      name: 'Alerts', icon: 'admin_panel_settings', route: '/admin/alerts',
+      name: 'Alerts', icon: 'notifications', route: '/admin/alerts',
       activeRoutes: ['AlertList', 'CreateAlert', 'EditAlert'], available: true
+      , subtitle: 'set up alerts'
     },
     {
-      name: 'Currency & Charges', icon: 'admin_panel_settings', route: '/admin/currency',
+      name: 'SMS Alert Currency', icon: 'model_training', route: '/admin/currency',
       activeRoutes: ['CurrencyList', 'CreateCurrency', 'EditCurrency'], available: true
+      , subtitle: 'set up currency charges'
     },
     {
-      name: 'Charge', icon: 'business', route: '/admin/branches',
-      activeRoutes: ['ChargeHistory'], available: true
+      name: 'Run Charges', icon: 'multiple_stop', route: '/admin/charges',
+      activeRoutes: ['RunCharge'], available: true
+      , subtitle: 'Run charge recovery'
     },
-  ],
-
-};
+    {
+      name: 'Charge History', icon: 'business', route: '/admin/branches',
+      activeRoutes: ['ChargeHistory'], available: true
+      , subtitle: 'view charge history'
+    },
+    {
+      name: 'Audit', icon: 'content_paste_search', route: '/admin/audit',
+      activeRoutes: ['AuditHistory'], available: true
+      , subtitle: 'view user activities history'
+    },
+  ]
 
 
 const menuCode = computed(() => {
@@ -251,17 +262,17 @@ function processStage() {
       }
 
       &:hover {
-        border: 1px solid #1976d2;
+        border: 1px solid #146052;
         background: rgba(25, 118, 210, 0.18);
-        color: #1976d2;
+        color: #146052;
 
         .q-icon {
-          color: #1976d2;
+          color: #146052;
         }
       }
 
       &.active-menu-item {
-        background: linear-gradient(135deg, #1976d2 0%, #004ba0 100%);
+        background-image: linear-gradient(120deg, #146052, #146052 100%);
         color: #e3f2fd;
 
 
@@ -276,7 +287,7 @@ function processStage() {
           top: 0;
           bottom: 0;
           width: 4px;
-          background: #1976d2;
+          background: #146052;
           border-radius: 4px 0 0 4px;
         }
       }

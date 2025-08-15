@@ -16,7 +16,7 @@ import MenuBar from "components/navigation/MenuBar.vue";
 <style scoped>
 .welcome-card {
   border-radius: 12px;
-  background: rgba(25, 118, 210, 0.14);
+  background: #f4fffc;
   transition: transform 0.3s ease;
 }
 
