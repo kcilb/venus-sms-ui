@@ -138,10 +138,6 @@ const utility = useCommonUtility();
 const dialogStore = useDialogStore();
 
 
-onMounted(() => {
-})
-
-
 const menuItems = {
   ADMIN: [
     {

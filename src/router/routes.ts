@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
     path: '/admin',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      {path: '', component: () => import('pages/admin/DashBoard.vue')}
+      {path: '', component: () => import('pages/admin/DashBoard.vue'), name: 'Dashboard'}
     ]
   },
 
