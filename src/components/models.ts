@@ -138,6 +138,19 @@ export interface ChargeTiers {
   modifiedDate: string | string; // Can be Date object or ISO string
 }
 
+export interface ChargeHistory {
+  id: number
+  totalAccounts: number
+  lowFundsCount: number
+  processedCount: number
+  failedCount: number
+  recoveredAmt: number
+  chargeDesc: string
+  createDt: string
+  status: 'COMPLETED' | 'FAILED' | 'PARTIAL'
+}
+
+
 export interface ChargeTierDTO{
   chargeTiers: ChargeTiers[];
   smsAlertCrncyId: number | null;

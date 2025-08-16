@@ -1,133 +1,202 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row q-mb-md items-center q-gutter-md">
-      <div class="row items-center q-gutter-sm">
-        <q-select
-          v-model="selectedMonth"
-          input-style="font-size:bold"
-          dropdown-icon="expand_more"
-          :options="monthOptions"
-          label="Month"
-          style="min-width: 120px"
-          outlined
-          dense
-          emit-value
-          map-options
+
+  <q-card bordered flat style="background: none" class="q-ma-lg">
+    <q-card class="row col-12" flat>
+      <q-toolbar class="q-pa-sm text-h6 bg-grey-4">
+        ROLES
+      </q-toolbar>
+      <div class="row col-12 q-pa-lg items-center q-gutter-md">
+        <div class="row items-center q-gutter-sm">
+          <q-select
+            v-model="selectedMonth"
+            input-style="font-size:bold"
+            dropdown-icon="expand_more"
+            :options="monthOptions"
+            label="Month"
+            style="min-width: 120px"
+            outlined
+            dense
+            emit-value
+            map-options
+          />
+          <q-select
+            dropdown-icon="expand_more"
+            v-model="selectedYear"
+            :options="yearOptions"
+            label="Year"
+            style="min-width: 100px"
+            outlined
+            dense
+            emit-value
+            map-options
+          />
+        </div>
+
+        <q-btn
+          color="positive"
+          icon="play_circle"
+          label="Run Charges"
+          :loading="isProcessing"
+          :disable="!selectedMonth || !selectedYear"
+          @click="showConfirmationDialog"
         />
+
+        <q-space/>
+
         <q-select
+          v-model="filterStatus"
           dropdown-icon="expand_more"
-          v-model="selectedYear"
-          :options="yearOptions"
-          label="Year"
-          style="min-width: 100px"
-          outlined
+          :options="statusOptions"
+          label="Filter by Status"
           dense
+          outlined
           emit-value
           map-options
+          style="min-width: 200px"
         />
       </div>
 
-      <q-btn
+      <!-- Progress Indicator -->
+      <q-linear-progress
+        v-if="isProcessing"
+        indeterminate
         color="primary"
-        icon="play_circle"
-        label="Run Charges"
-        :loading="isProcessing"
-        :disable="!selectedMonth || !selectedYear"
-        @click="runChargesForSelectedMonth"
+        class="q-mb-md"
       />
 
-      <q-space />
+      <q-table
+        class="col-12"
+        title="Charge Execution History"
+        :rows="filteredHistory"
+        :columns="columns"
+        row-key="id"
+        :loading="isLoading"
+        :pagination="pagination"
+        binary-state-sort
+      >
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+              class="tb-header"
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+        <template #body-cell-period="props">
+          <q-td :props="props">
+            {{ formatMonthYear(props.row.period) }}
+          </q-td>
+        </template>
 
-      <q-select
-        v-model="filterStatus"
-        dropdown-icon="expand_more"
-        :options="statusOptions"
-        label="Filter by Status"
-        dense
-        outlined
-        emit-value
-        map-options
-        style="min-width: 200px"
-      />
-    </div>
+        <template #body-cell-status="props">
+          <q-td :props="props">
+            <q-badge :color="getStatusColor(props.row.status)">
+              {{ props.row.status }}
+            </q-badge>
+          </q-td>
+        </template>
 
-    <!-- Progress Indicator -->
-    <q-linear-progress
-      v-if="isProcessing"
-      indeterminate
-      color="primary"
-      class="q-mb-md"
-    />
+        <template #body-cell-recoveredAmt="props">
+          <q-td :props="props" class="text-right">
+            {{ formatCurrency(props.row.recoveredAmt) }}
+          </q-td>
+        </template>
 
-    <!-- History Table -->
-    <q-table
-      title="Charge Execution History"
-      :rows="filteredHistory"
-      :columns="columns"
-      row-key="id"
-      :loading="isLoading"
-      :pagination="pagination"
-      binary-state-sort
-    >
-      <template #body-cell-period="props">
-        <q-td :props="props">
-          {{ formatMonthYear(props.row.period) }}
-        </q-td>
-      </template>
+        <template #body-cell-createDt="props">
+          <q-td :props="props">
+            {{ formatDateTime(props.row.createDt) }}
+          </q-td>
+        </template>
+      </q-table>
+    </q-card>
 
-      <template #body-cell-status="props">
-        <q-td :props="props">
-          <q-badge :color="getStatusColor(props.row.status)">
-            {{ props.row.status }}
-          </q-badge>
-        </q-td>
-      </template>
+    <q-dialog v-model="showDialog" persistent>
+      <q-card style="min-width: 400px; border-radius: 8px;">
+        <q-card-section class="bg-primary text-white">
+          <div class="text-h6">Monthly Charges Execution
+            <q-icon
+              name="warning"
+              size="sm"
+              color="white"
+              class="q-ml-sm"
+            />
+          </div>
 
-      <template #body-cell-recoveredAmt="props">
-        <q-td :props="props" class="text-right">
-          {{ formatCurrency(props.row.recoveredAmt) }}
-        </q-td>
-      </template>
+        </q-card-section>
 
-      <template #body-cell-createDt="props">
-        <q-td :props="props">
-          {{ formatDateTime(props.row.createDt) }}
-        </q-td>
-      </template>
-    </q-table>
-  </q-page>
+        <q-card-section class="q-pt-md">
+          <div class="row items-center q-mb-sm">
+            <q-icon name="calendar_month" color="grey" size="md"/>
+            <span class="q-ml-sm text-body1">
+          Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
+        </span>
+          </div>
+
+          <q-separator spaced/>
+
+          <div class="text-subtitle1 q-mt-md">
+            <q-icon name="info" color="warning" class="q-mr-xs"/>
+            This operation will:
+          </div>
+          <ul class="q-pl-md q-mt-sm">
+            <li>Apply charges to all eligible accounts</li>
+            <li>Generate transaction records</li>
+            <li>Update account balances</li>
+          </ul>
+
+          <div class="text-negative q-mt-md">
+            <q-icon name="error_outline" class="q-mr-xs"/>
+            <strong>Warning:</strong> This action cannot be undone.
+          </div>
+        </q-card-section>
+
+        <q-separator/>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            flat
+            label="Cancel"
+            color="grey-7"
+            v-close-popup
+            class="q-px-md"
+          />
+          <q-btn
+            label="Run Charges"
+            color="positive"
+            unelevated
+            class="q-px-lg"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+  </q-card>
+
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import {format, useQuasar} from 'quasar'
-import { api } from 'boot/axios'
+import {api} from 'boot/axios'
 import moment from "moment";
+import {ChargeHistory} from "components/models";
 
-interface ChargeHistory {
-  id: number
-  totalAccounts: number
-  lowFundsCount: number
-  processedCount: number
-  failedCount: number
-  recoveredAmt: number
-  chargeDesc: string
-  createDt: string
-  status: 'COMPLETED' | 'FAILED' | 'PARTIAL'
-}
 
 const selectedMonth = ref<number | null>(null)
 const selectedYear = ref<number | null>(null)
 
 
-
-const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+const monthOptions = Array.from({length: 12}, (_, i) => ({
   label: moment().month(i).format('MMMM'), // Full month name
   value: i + 1 // Months 1-12
 }))
 
 const currentYear = moment().year()
-const yearOptions = Array.from({ length: 5 }, (_, i) => ({
+const yearOptions = Array.from({length: 5}, (_, i) => ({
   label: String(currentYear - i),
   value: currentYear - i
 }))
@@ -140,6 +209,11 @@ selectedYear.value = currentMonth.year()
 const formatMonthYear = (period: string) => {
   return moment(period, 'YYYY-MM').format('MMMM YYYY')
 }
+
+const selectedPeriod = computed(() => {
+  if (!selectedMonth.value || !selectedYear.value) return ''
+  return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
+})
 
 const $q = useQuasar()
 
@@ -203,10 +277,10 @@ const columns = [
 ]
 
 const statusOptions = [
-  { label: 'All', value: null },
-  { label: 'Completed', value: 'COMPLETED' },
-  { label: 'Failed', value: 'FAILED' },
-  { label: 'Partial', value: 'PARTIAL' }
+  {label: 'All', value: null},
+  {label: 'Completed', value: 'COMPLETED'},
+  {label: 'Failed', value: 'FAILED'},
+  {label: 'Partial', value: 'PARTIAL'}
 ]
 
 const pagination = {
@@ -222,31 +296,6 @@ const filteredHistory = computed(() => {
   return chargeHistory.value.filter(item => item.status === filterStatus.value)
 })
 
-// Methods
-const fetchChargeHistory = async () => {
-  try {
-    isLoading.value = true
-    const { data } = await api.get<ChargeHistory[]>('/api/charges/history')
-    chargeHistory.value = data
-  } catch (error) {
-    showNotification('negative', 'Failed to load charge history')
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const runMonthlyCharges = async () => {
-  isProcessing.value = true
-  try {
-    await api.post('/api/charges/run-monthly')
-    showNotification('positive', 'Monthly charges processed successfully')
-    await fetchChargeHistory() // Refresh data
-  } catch (error) {
-    showNotification('negative', 'Failed to process monthly charges')
-  } finally {
-    isProcessing.value = false
-  }
-}
 
 const showNotification = (color: string, message: string) => {
   $q.notify({
@@ -258,10 +307,14 @@ const showNotification = (color: string, message: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'COMPLETED': return 'positive'
-    case 'FAILED': return 'negative'
-    case 'PARTIAL': return 'warning'
-    default: return 'grey'
+    case 'COMPLETED':
+      return 'positive'
+    case 'FAILED':
+      return 'negative'
+    case 'PARTIAL':
+      return 'warning'
+    default:
+      return 'grey'
   }
 }
 
@@ -275,32 +328,40 @@ const formatCurrency = (amount: number) => {
 const formatDateTime = (dateString: string) => {
   return new Date(dateString).toLocaleString()
 }
+const showDialog = ref(false);
 
-// Lifecycle hook
-onMounted(() => {
-  fetchChargeHistory()
-})
-
-const runChargesForSelectedMonth = async () => {
+const showConfirmationDialog = () => {
   if (!selectedMonth.value || !selectedYear.value) return
-
-  isProcessing.value = true
-  try {
-    const period = `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
-    await api.post('/api/charges/run', { period })
-    showNotification('positive', `Charges processed for ${formatMonthYear(period)}`)
-    await fetchChargeHistory() // Refresh data
-  } catch (error) {
-    showNotification('negative', 'Failed to process charges')
-  } finally {
-    isProcessing.value = false
-  }
+  showDialog.value = true
 }
+
 
 </script>
 
 <style scoped>
 .q-table {
   height: calc(100vh - 150px);
+}
+
+thead tr th {
+  position: sticky;
+  z-index: 1
+}
+
+thead tr:last-child th {
+  top: 48px;
+}
+
+thead tr:first-child th {
+  top: 0
+}
+
+.tb-header {
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+  background: none;
+  position: sticky;
+  z-index: 1;
 }
 </style>
