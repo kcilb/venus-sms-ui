@@ -3,7 +3,7 @@
   <q-card bordered flat style="background: none" class="q-ma-lg">
     <q-card class="row col-12" flat>
       <q-toolbar class="q-pa-sm text-h6 bg-grey-4">
-        ROLES
+        Charges
       </q-toolbar>
       <div class="row col-12 q-pa-lg items-center q-gutter-md">
         <div class="row items-center q-gutter-sm">
@@ -167,7 +167,6 @@
           <q-btn
             label="Run Charges"
             color="positive"
-            unelevated
             class="q-px-lg"
           />
         </q-card-actions>
