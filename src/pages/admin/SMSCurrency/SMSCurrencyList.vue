@@ -54,10 +54,10 @@
                 {{ props.row.crncyIso }}
               </q-td>
               <q-td key="status" :props="props">
-                {{ props.row.status }}
+                {{ props.row.status == 'A' ? 'Active' : 'Inactive' }}
               </q-td>
               <q-td key="edit" :props="props">
-                <q-btn glossy @click="onClickEdit(props.row)" color="blue-8" round outline size="11px"
+                <q-btn @click="onClickEdit(props.row)" color="positive" round outline size="11px"
                        icon="edit">
                   <q-tooltip style="font-size: 13px">edit</q-tooltip>
                 </q-btn>
@@ -94,7 +94,7 @@ const filter = ref();
 
 
 onMounted(() => {
-  findCurrency();
+  findSmsAlertCurrencies();
 })
 
 const pagination = ref({
@@ -131,16 +131,16 @@ const rows = computed(() => {
   return adminStore.currencyList;
 })
 
-const loading = computed(()=>{
+const loading = computed(() => {
   return adminStore.loading;
 });
 
 
-async function findCurrency() {
+async function findSmsAlertCurrencies() {
   try {
     let request = {} as SmsAlertCurrency;
-    await adminStore.findCurrency(request);
-    if (adminStore.response.code !== '00') {
+    await adminStore.findSmsAlertCurrencies(request);
+    if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
     }
@@ -151,7 +151,7 @@ async function findCurrency() {
 
 
 function onClickEdit(data: SmsAlertCurrency) {
-  router.push('/admin/currency/edit/' + data.itemUuid);
+  router.push('/admin/currency/edit/' + data.smsAlertCrncyId);
 }
 
 

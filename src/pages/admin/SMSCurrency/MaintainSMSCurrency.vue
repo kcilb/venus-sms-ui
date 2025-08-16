@@ -17,6 +17,7 @@
               <div class="row q-col-gutter-md col-lg-12 col-md-12 col-sm-12">
                 <div class="col-md-6">
                   <q-select
+                    :readonly="form.smsAlertCrncyId != undefined"
                     outlined
                     :rules="[val => !!val || 'Currency is required']"
                     dropdown-icon="expand_more"
@@ -24,6 +25,7 @@
                     map-options
                     option-label="crncyNm"
                     option-value="crncyId"
+                    emit-value
                     v-model="form.crncyId"
                     :options="assignableCurrencyList"
                     label="Currency"
@@ -90,7 +92,7 @@ const alerts = useAlerts();
 const dialogStore = useDialogStore();
 
 onMounted(() => {
-  findInstitutionCurrencies();
+  findInstitutionCurrencies(route.params.id);
   findCurrencyById(route.params.id);
 })
 
@@ -99,7 +101,7 @@ const form = ref<SmsAlertCurrency>({
   crncyId: null,
   crncyNm: null,
   crncyIso: null,
-  status: 'Active',
+  status: 'A',
   createdBy: 'TEST',
   createDt: null,
   modifiedBy: 'TEST',
@@ -122,12 +124,15 @@ watch(
 function onChangeCurrency(val: any) {
   let currency = assignableCurrencyList.value.filter(f => f.crncyId == val)!;
   form.value.crncyNm = currency[0].crncyNm;
+  form.value.crncyIso = currency[0].crncyIso;
 }
 
 
-async function findInstitutionCurrencies() {
+async function findInstitutionCurrencies(id: number | null) {
   try {
-    await adminStore.findInstitutionCurrencies();
+    let request = {} as SmsAlertCurrency;
+    request.smsAlertCrncyId = id;
+    await adminStore.findInstitutionCurrencies(request);
     if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
@@ -137,19 +142,19 @@ async function findInstitutionCurrencies() {
   }
 }
 
-async function findCurrencyById(id: string) {
+async function findCurrencyById(id: number) {
   if (id == undefined)
     return;
 
   try {
     let request = {} as SmsAlertCurrency;
     request.smsAlertCrncyId = id;
-    await adminStore.findCurrencyByUUID(request);
+    await adminStore.findSmsAlertCurrencies(request);
     if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
     }
-    populateForm(adminStore.currencyData)
+    populateForm(adminStore.currencyList[0])
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }
@@ -176,6 +181,7 @@ async function onSaveCurrency() {
     alerts.showAlert(adminStore.response);
     router.go(-1);
   } catch (e) {
+    adminStore.loading = false;
     alerts.showAlert(utility.getError(e));
   }
 }

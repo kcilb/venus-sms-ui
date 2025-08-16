@@ -76,7 +76,7 @@ export interface SmsAlertCurrency {
   crncyIso: string | null;
   crncyId: number | null;
   crncyNm: string | null;
-  status: 'Active' | 'Inactive' | 'Pending';
+  status: 'A' | 'I';
   createdBy: string | null;
   createDt: string | null;
   modifiedBy: string | null;

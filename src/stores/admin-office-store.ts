@@ -70,12 +70,12 @@ export const useAdminOfficesStore = defineStore('admin', {
       }
     },
 
-    async findInstitutionCurrencies() {
+    async findInstitutionCurrencies(request: SmsAlertCurrency) {
       this.apiResponse = {} as any;
       this.currencyList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-currency', {}, {
+        await api.post('admin/find-currency', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -109,16 +109,16 @@ export const useAdminOfficesStore = defineStore('admin', {
       }
     },
 
-
-    async findCurrencyByUUID(request: SmsAlertCurrency) {
+    async findSmsAlertCurrencies(request: SmsAlertCurrency) {
       this.apiResponse = {} as any;
+      this.currencyList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-currency-by-uuid', request, {
+        await api.post('admin/find-sms-alert-currencies', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
-          this.currencyData = this.apiResponse.data;
+          this.currencyList = utility.convertArrayResponseData<SmsAlertCurrency>(this.apiResponse.data);
           this.response = utility.convertResponseMessageObj(this.apiResponse);
         });
       } catch (err) {
@@ -132,8 +132,11 @@ export const useAdminOfficesStore = defineStore('admin', {
     async maintainCurrency(request: SmsAlertCurrency) {
       this.apiResponse = {} as any;
       this.loading = true;
-      request.createdBy = utility.getAuthData().loginId;
-      request.modifiedBy = utility.getAuthData().loginId;
+      // request.createdBy = utility.getAuthData().loginId;
+      // request.modifiedBy = utility.getAuthData().loginId;
+
+      request.createdBy = 'TEST';
+      request.modifiedBy = 'TEST';
       try {
         await api.post('admin/maintain-currency', request, {
           headers: {'Content-Type': 'application/json'}

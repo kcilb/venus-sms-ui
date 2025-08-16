@@ -15,9 +15,9 @@ export function useAlerts() {
     $q.notify({
       actions: [{icon: 'close', color: 'white'}],
       timeout: 5000,
-      icon: resp.code !== '00' ? 'error_outline' : 'task_alt',
+      icon: resp.code !== '0' ? 'error_outline' : 'task_alt',
       message: resp?.message,
-      color: resp.code !== '00' ? 'negative' : 'positive',
+      color: resp.code !== '0' ? 'negative' : 'positive',
       position: 'bottom'
     });
   }
