@@ -2,7 +2,10 @@
   <q-dialog v-model="dialogStore.tiers" persistent transition-show="scale" transition-hide="scale">
     <q-card style="width: 810px; max-width: 90vw;">
       <q-card-section class="bg-primary">
-        <div class="text-h6 text-white">Charge Tiers</div>
+        <div class="text-h6 text-white">Charge Tiers
+          <q-chip>{{ currencyData.crncyIso }}</q-chip>
+        </div>
+
       </q-card-section>
       <q-card-section class="q-mt-sm">
         <div class="col-12">
@@ -146,18 +149,18 @@ const isGenerated = ref([]) as any;
 
 const changeTierList = computed(() => {
   let i = 0;
-  while (i < (adminStore.changeTierList.length - 1)) {
+  while (i < (adminStore.chargeTierList.length - 1)) {
     isGenerated.value[i] = true;
     i++;
   }
-  return adminStore.changeTierList;
+  return adminStore.chargeTierList;
 });
 
 
 watch(
   () => props.currencyData,
   (newValue) => {
-    if (newValue.smsAlertCrncyId != null) {
+    if (dialogStore.tiers) {
       findCurrencyChargeTier(newValue.smsAlertCrncyId)
     }
   }
@@ -262,13 +265,13 @@ async function onClickSaveTier() {
         tierData.exciseCharge = element.exciseCharge;
         tierData.vendorCharge = element.vendorCharge;
         tierData.bankCharge = element.bankCharge;
-        tierData.modifiedDate = moment().format("YYYY-MM-DD HH:mm:ss");
-        tierData.modifiedBy = 'Admin';
+        tierData.modifiedDate = null;
+        tierData.modifiedBy = 'TEST';
         tiersList.push(tierData);
       })
     }
 
-    request.tiers = tiersList;
+    request.chargeTiers = tiersList;
     request.smsAlertCrncyId = props.currencyData.smsAlertCrncyId;
 
     await adminStore.maintainCurrencyChargeTiers(request);
@@ -280,6 +283,7 @@ async function onClickSaveTier() {
     await onClickTiers();
 
   } catch (e) {
+    console.log(e);
     alerts.showAlert(utility.getError(e))
   }
 
@@ -290,12 +294,12 @@ async function onClickTiers() {
 }
 
 function onClickDelete(selectedItem: any) {
-  adminStore.changeTierList.pop();
-  isGenerated.value[adminStore.changeTierList.length - 1] = false;
+  adminStore.chargeTierList.pop();
+  isGenerated.value[adminStore.chargeTierList.length - 1] = false;
 }
 
 function onClose() {
-  adminStore.changeTierList = [];
+  adminStore.chargeTierList = [];
   emit('onClickClose')
 }
 </script>

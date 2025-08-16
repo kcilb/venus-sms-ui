@@ -146,6 +146,6 @@ export interface ChargeTierDTO{
 
 export interface ChargeTierRequest {
   smsAlertCrncyId: number;
-  tiers: ChargeTiers[];
+  chargeTiers: ChargeTiers[];
   isEdit: boolean;
 }

@@ -67,7 +67,7 @@
         </q-form>
       </q-card-section>
 
-      <ChargeTiers :currencyData="form" @onClickClose="onClickCharges"></ChargeTiers>
+      <ChargeTiers :currencyData="currencyData" @onClickClose="onClickCharges"></ChargeTiers>
     </q-card>
   </q-card>
 </template>
@@ -186,8 +186,14 @@ async function onSaveCurrency() {
   }
 }
 
+const currencyData = ref<SmsAlertCurrency | null>(null);
+
 function onClickCharges() {
   dialogStore.tiers = !dialogStore.tiers;
+  currencyData.value = null;
+  if (dialogStore.tiers)
+    currencyData.value = form.value;
+
 }
 
 </script>

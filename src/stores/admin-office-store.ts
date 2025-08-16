@@ -19,7 +19,7 @@ export const useAdminOfficesStore = defineStore('admin', {
     userList: reactive<User[]>([]),
     userData: ref<User>({} as User),
 
-    changeTierList: reactive<ChargeTiers[]>([]),
+    chargeTierList: reactive<ChargeTiers[]>([]),
 
     assignableCurrencyList: reactive<any[]>([]),
     currencyList: reactive<SmsAlertCurrency[]>([]),
@@ -36,14 +36,14 @@ export const useAdminOfficesStore = defineStore('admin', {
 
     async findCurrencyChargeTier(request: ChargeTierRequest) {
       this.apiResponse = {} as any;
-      this.changeTierList = [];
+      this.chargeTierList = [];
       this.loading = true;
       try {
         await api.post('admin/find-currency-charge-tier', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
-          this.changeTierList = utility.convertArrayResponseData<ChargeTiers>(this.apiResponse.data);
+          this.chargeTierList = utility.convertArrayResponseData<ChargeTiers>(this.apiResponse.data);
           this.response = utility.convertResponseMessageObj(this.apiResponse);
         });
       } catch (err) {
@@ -53,15 +53,14 @@ export const useAdminOfficesStore = defineStore('admin', {
       }
     },
 
-    async maintainCurrencyChargeTiers(request: any) {
+    async maintainCurrencyChargeTiers(request: ChargeTierRequest) {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
         await api.post('admin/maintain-currency-charge-tier', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
-          this.apiResponse = response.data;
-          this.response = utility.convertResponseMessageObj(this.apiResponse);
+          this.response = response.data;
         });
       } catch (err) {
         throw err;
