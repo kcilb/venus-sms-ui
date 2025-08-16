@@ -124,7 +124,8 @@ export interface Roles {
 }
 
 export interface ChargeTiers {
-  ptId: number | string; // Payment Type ID (can be number or UUID string)
+  id: number | null; // Payment Type ID (can be number or UUID string)
+  smsAlertCrncyId: number | null;
   chargeDesc: string;    // Description of the charge
   txnType: string;      // Transaction type (e.g., 'DEPOSIT', 'WITHDRAWAL')
   minValue: number;     // Minimum applicable value
@@ -132,9 +133,15 @@ export interface ChargeTiers {
   vendorCharge: number; // Charge amount for vendor
   bankCharge: number;   // Charge amount for bank
   exciseCharge: number; // Government excise charge
-  status: 'Active';
+  status: 'A';
   modifiedBy: string;   // User who last modified
   modifiedDate: string | string; // Can be Date object or ISO string
+}
+
+export interface ChargeTierDTO{
+  chargeTiers: ChargeTiers[];
+  smsAlertCrncyId: number | null;
+  isRemove: boolean;
 }
 
 export interface ChargeTierRequest {

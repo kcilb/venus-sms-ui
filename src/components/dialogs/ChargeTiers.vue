@@ -109,7 +109,7 @@
 <script setup lang="ts">
 
 import {useDialogStore} from "stores/dialog-store";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import {useAdminOfficesStore} from "stores/admin-office-store";
 import {useAlerts} from "src/utility/alerts";
 import {ChargeTierRequest, ChargeTiers} from "components/models";
@@ -120,6 +120,7 @@ const dialogStore = useDialogStore();
 const adminStore = useAdminOfficesStore();
 const alerts = useAlerts();
 const utility = useCommonUtility();
+const props = defineProps(['currencyData']);
 const emit = defineEmits(['onClickClose'])
 
 const pagination = ref({
@@ -151,6 +152,16 @@ const changeTierList = computed(() => {
   }
   return adminStore.changeTierList;
 });
+
+
+watch(
+  () => props.currencyData,
+  (newValue) => {
+    if (newValue.smsAlertCrncyId != null) {
+      findCurrencyChargeTier(newValue.smsAlertCrncyId)
+    }
+  }
+);
 
 
 function onClickAddTier() {
@@ -199,10 +210,10 @@ function onClickAddTier() {
 }
 
 
-async function findCurrencyChargeTier() {
+async function findCurrencyChargeTier(smsAlertCrncyId: number) {
   try {
     let request = <ChargeTierRequest>{};
-    request.smsAlertCrncyId = 1;
+    request.smsAlertCrncyId = smsAlertCrncyId;
     await adminStore.findCurrencyChargeTier(request);
     if (adminStore.response.code != "0") {
       alerts.showAlert(adminStore.response)
@@ -244,7 +255,8 @@ async function onClickSaveTier() {
 
       changeTierList.value.forEach(element => {
         let tierData = <ChargeTiers>({});
-        tierData.ptId = element.ptId;
+        tierData.id = element.id;
+        tierData.smsAlertCrncyId = props.currencyData.smsAlertCrncyId;
         tierData.minValue = element.minValue;
         tierData.maxValue = element.maxValue;
         tierData.exciseCharge = element.exciseCharge;
@@ -257,8 +269,7 @@ async function onClickSaveTier() {
     }
 
     request.tiers = tiersList;
-    request.isEdit = true;
-    request.smsAlertCrncyId = 1;
+    request.smsAlertCrncyId = props.currencyData.smsAlertCrncyId;
 
     await adminStore.maintainCurrencyChargeTiers(request);
     if (adminStore.response.code != "0") {
@@ -275,7 +286,7 @@ async function onClickSaveTier() {
 }
 
 async function onClickTiers() {
-  await findCurrencyChargeTier();
+  await findCurrencyChargeTier(props.currencyData.smsAlertCrncyId);
 }
 
 function onClickDelete(selectedItem: any) {
