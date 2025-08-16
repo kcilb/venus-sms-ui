@@ -1,5 +1,6 @@
-import { defineBoot } from '#q-app/wrappers';
-import axios, { type AxiosInstance } from 'axios';
+import {defineBoot} from '#q-app/wrappers';
+import axios, {type AxiosInstance} from 'axios';
+import {useCommonUtility} from "src/utility/common";
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -14,9 +15,9 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'https://api.example.com' });
+const api = axios.create({baseURL: 'http://localhost:8081/apis/v2/'});
 
-export default defineBoot(({ app }) => {
+export default defineBoot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
@@ -28,4 +29,32 @@ export default defineBoot(({ app }) => {
   //       so you can easily perform requests against your app's API
 });
 
-export { api };
+
+const excludedPaths = ['/login', '/reset', '/password-change'];
+const utility = useCommonUtility();
+
+api.interceptors.request.use(function (config) {
+  //const token = utility.getTokenData();
+  const shouldExclude = excludedPaths.some((path) =>
+    config.url?.startsWith(path)
+  );
+
+  if (!shouldExclude) {
+    let username = "neptune";
+    let password = "p@ssw0rd";
+    if (username && password) {
+      const credentials = `${username}:${password}`;
+      const base64Credentials = btoa(credentials);
+      config.headers.Authorization = `Basic ${base64Credentials}`;
+    }
+  }
+  if (!config.headers['Content-Type']) {
+    config.headers['Content-Type'] = 'application/json';
+  }
+
+  return config;
+}, function (error) {
+  return Promise.reject(error);
+});
+
+export {api};

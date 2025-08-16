@@ -81,7 +81,6 @@ export interface SmsAlertCurrency {
   createDt: string | null;
   modifiedBy: string | null;
   modifyDt: string | null;
-  itemUuid: string | null
 }
 
 export interface User {

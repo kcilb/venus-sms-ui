@@ -12,7 +12,7 @@
           <div class="row justify-center q-col-gutter-md col-lg-12 col-md-12 col-sm-12">
             <div class="col-8">
               <div class="row justify-end q-mb-md">
-                <q-btn no-caps color="primary">Configure Charges</q-btn>
+                <q-btn @click="onClickCharges" no-caps color="primary">Configure Charges</q-btn>
               </div>
               <div class="row q-col-gutter-md col-lg-12 col-md-12 col-sm-12">
                 <div class="col-md-6">
@@ -35,8 +35,12 @@
                     outlined
                     :rules="[val => !!val || 'Status is required']"
                     dropdown-icon="expand_more"
+                    emit-value
+                    map-options
+                    option-value="code"
+                    option-label="description"
                     v-model="form.status"
-                    :options="['Active', 'Inactive']"
+                    :options="[{code:'A',description:'Active'}, {code:'I', description:'Inactive'}]"
                     label="Status"
                   />
                 </div>
@@ -60,6 +64,8 @@
 
         </q-form>
       </q-card-section>
+
+      <ChargeTiers :currencyData="form" @onClickClose="onClickCharges"></ChargeTiers>
     </q-card>
   </q-card>
 </template>
@@ -72,6 +78,8 @@ import {useAdminOfficesStore} from "stores/admin-office-store";
 import {SmsAlertCurrency} from "components/models";
 import {useCommonUtility} from "src/utility/common";
 import {useAlerts} from "src/utility/alerts";
+import {useDialogStore} from "stores/dialog-store";
+import ChargeTiers from "components/dialogs/ChargeTiers.vue";
 
 
 const router = useRouter();
@@ -79,10 +87,11 @@ const route = useRoute();
 const adminStore = useAdminOfficesStore();
 const utility = useCommonUtility();
 const alerts = useAlerts();
+const dialogStore = useDialogStore();
 
 onMounted(() => {
   findInstitutionCurrencies();
-  findCurrencyByUUID(route.params.id);
+  findCurrencyById(route.params.id);
 })
 
 const form = ref<SmsAlertCurrency>({
@@ -95,7 +104,6 @@ const form = ref<SmsAlertCurrency>({
   createDt: null,
   modifiedBy: 'TEST',
   modifyDt: null,
-  itemUuid: null
 })
 
 const assignableCurrencyList = computed(() => {
@@ -120,7 +128,7 @@ function onChangeCurrency(val: any) {
 async function findInstitutionCurrencies() {
   try {
     await adminStore.findInstitutionCurrencies();
-    if (adminStore.response.code !== '00') {
+    if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
     }
@@ -129,15 +137,15 @@ async function findInstitutionCurrencies() {
   }
 }
 
-async function findCurrencyByUUID(uuid: string) {
-  if (uuid == undefined)
+async function findCurrencyById(id: string) {
+  if (id == undefined)
     return;
 
   try {
     let request = {} as SmsAlertCurrency;
-    request.itemUuid = uuid;
+    request.smsAlertCrncyId = id;
     await adminStore.findCurrencyByUUID(request);
-    if (adminStore.response.code !== '00') {
+    if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
     }
@@ -161,7 +169,7 @@ async function onSaveCurrency() {
     let request = {} as SmsAlertCurrency;
     request = form.value;
     await adminStore.maintainCurrency(request);
-    if (adminStore.response.code !== '00') {
+    if (adminStore.response.code !== '0') {
       alerts.showAlert(adminStore.response);
       return;
     }
@@ -170,6 +178,10 @@ async function onSaveCurrency() {
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }
+}
+
+function onClickCharges() {
+  dialogStore.tiers = !dialogStore.tiers;
 }
 
 </script>

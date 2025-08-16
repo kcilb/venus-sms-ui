@@ -1,15 +1,14 @@
 <template>
-  <!-- Biller Tiers -->
   <q-dialog v-model="dialogStore.tiers" persistent transition-show="scale" transition-hide="scale">
     <q-card style="width: 810px; max-width: 90vw;">
       <q-card-section class="bg-primary">
-        <div class="text-h6 text-white">Biller Tiers - [ {{ billerCode }} ]</div>
+        <div class="text-h6 text-white">Charge Tiers</div>
       </q-card-section>
       <q-card-section class="q-mt-sm">
         <div class="col-12">
           <div class="row ">
             <div class="col-12 flex justify-end">
-              <q-btn class="q-mr-sm" color="primary" @click="onClickAddTier">
+              <q-btn class="q-mr-sm" no-caps color="primary" @click="onClickAddTier">
                 Add Tier
               </q-btn>
             </div>
@@ -43,14 +42,11 @@
 
             <template v-slot:body="props">
               <q-tr :props="props">
-                <q-td key="serialId" :props="props">
-                  {{ props.row.serialId }}
-                </q-td>
-                <q-td key="minAmount" :props="props">
+                <q-td key="minValue" :props="props">
                   <q-input style="width: 100px" type="number" :readonly="true" outlined dense filled
                            v-model="props.row.minValue"></q-input>
                 </q-td>
-                <q-td key="maxAmount" :props="props">
+                <q-td key="maxValue" :props="props">
                   <q-input style="width: 100px" type="number" :filled="isGenerated[props.rowIndex]"
                            :readonly="isGenerated[props.rowIndex]" outlined dense
                            v-model="props.row.maxValue"></q-input>
@@ -97,9 +93,9 @@
           <q-separator></q-separator>
 
           <div class="q-mt-sm col-12 flex justify-end">
-            <q-btn class="q-mr-sm" :loading="adminStore.loading" label="Save" color="green-5"
+            <q-btn no-caps class="q-mr-sm" :loading="adminStore.loading" label="Save" color="positive"
                    @click="onClickSaveTier"/>
-            <q-btn :disable="adminStore.loading" label="Close" color="red-5"
+            <q-btn no-caps :disable="adminStore.loading" @click="onClose" label="Close" color="red-5"
                    v-close-popup/>
           </div>
         </div>
@@ -124,6 +120,7 @@ const dialogStore = useDialogStore();
 const adminStore = useAdminOfficesStore();
 const alerts = useAlerts();
 const utility = useCommonUtility();
+const emit = defineEmits(['onClickClose'])
 
 const pagination = ref({
   sortBy: 'desc',
@@ -135,12 +132,11 @@ const pagination = ref({
 const filter = ref('');
 
 const columns = ref([
-  {name: 'serialId', required: true, align: 'left', label: '#', field: 'serialId', sortable: true},
-  {name: 'minAmount', align: 'left', label: 'Min', field: 'minAmount'},
-  {name: 'maxAmount', align: 'left', label: 'Max', field: 'maxAmount'},
-  {name: 'tierVendorCharge', align: 'left', label: 'Vendor Charge', field: 'tierVendorCharge'},
-  {name: 'tierBankCharge', align: 'left', label: 'Bank Charge', field: 'tierBankCharge'},
-  {name: 'tierTaxCharge', align: 'left', label: 'Tax Charge', field: 'tierTaxCharge'},
+  {name: 'minValue', align: 'left', label: 'Min', field: 'minValue'},
+  {name: 'maxValue', align: 'left', label: 'Max', field: 'maxValue'},
+  {name: 'vendorCharge', align: 'left', label: 'Vendor Charge', field: 'vendorCharge'},
+  {name: 'bankCharge', align: 'left', label: 'Bank Charge', field: 'bankCharge'},
+  {name: 'exciseCharge', align: 'left', label: 'Tax Charge', field: 'exciseCharge'},
   {name: 'action', align: 'left', label: '', field: 'action'}
 ])
 
@@ -195,9 +191,9 @@ function onClickAddTier() {
 
   maxValue++
   items = {
-    serialId: tierListLength + 1, minAmount: maxValue,
-    maxAmount: null, tierTaxCharge: null,
-    tierVendorCharge: null, tierBankCharge: null, action: ''
+    minValue: maxValue,
+    maxValue: null, taxCharge: null,
+    vendorCharge: null, bankCharge: null, action: ''
   }
   changeTierList.value.push(items);
 }
@@ -282,8 +278,14 @@ async function onClickTiers() {
   await findCurrencyChargeTier();
 }
 
-function onClickDelete(data: any) {
-  console.log(data);
+function onClickDelete(selectedItem: any) {
+  adminStore.changeTierList.pop();
+  isGenerated.value[adminStore.changeTierList.length - 1] = false;
+}
+
+function onClose() {
+  adminStore.changeTierList = [];
+  emit('onClickClose')
 }
 </script>
 

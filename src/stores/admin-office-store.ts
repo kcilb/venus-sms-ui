@@ -36,7 +36,7 @@ export const useAdminOfficesStore = defineStore('admin', {
 
     async findCurrencyChargeTier(request: ChargeTierRequest) {
       this.apiResponse = {} as any;
-      this.currencyList = [];
+      this.changeTierList = [];
       this.loading = true;
       try {
         await api.post('admin/find-currency-charge-tier', request, {

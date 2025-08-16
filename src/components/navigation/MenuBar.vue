@@ -158,7 +158,7 @@ const menuItems =
       , subtitle: 'set up alerts'
     },
     {
-      name: 'SMS Alert Currency', icon: 'model_training', route: '/admin/currency',
+      name: 'SMS Currency', icon: 'model_training', route: '/admin/currency',
       activeRoutes: ['CurrencyList', 'CreateCurrency', 'EditCurrency'], available: true
       , subtitle: 'set up currency charges'
     },
