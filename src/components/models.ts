@@ -20,34 +20,12 @@ export enum Errors {
 
 
 export interface TokenMap {
-  processDate: string | null;
-  employeeId: number | null;
-  roleDescr: string | null;
-  branchDesc: string | null;
-  employeeName: string | null;
-  pwdExpiryDate: string | null;
-  passwordChanged: 'Y' | 'N';
-  loginLimits: string | null;
-  minPwdLength: string | null;
-  lastLogonDate: string | null;
-  emailAddress: string | null;
-  loginId: string | null;
-  branchId: number | null;
-  branchNo: number | null;
-  emplNo: string | null;
-  userRoleId: number | null;
-  status: string | null;
   gender: string | null;
 }
 
 export interface AuthRequest {
-  userName: string | null;
+  username: string | null;
   password: string | null;
-  emailAddress: string | null;
-  employeeId: number;
-  deviceId: string | null;
-  status: string | null;
-  token: string | null;
 }
 
 export interface ChangeRequest {

@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('auth/loginUser', request, {
+        await api.post('auth/login', request, {
           headers: {
             'Content-Type': 'application/json'
           }
