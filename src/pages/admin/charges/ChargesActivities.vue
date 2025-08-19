@@ -66,7 +66,7 @@
 
       <q-table
         class="col-12"
-        title="Charge Execution History"
+        title="Charge History"
         :rows="filteredHistory"
         :columns="columns"
         row-key="id"
@@ -156,8 +156,9 @@
 
         <q-separator/>
 
-        <q-card-actions align="right" class="q-pa-md">
+        <q-card-actions align="center" class="q-pa-md">
           <q-btn
+            no-caps
             flat
             label="Cancel"
             color="grey-7"
@@ -165,10 +166,18 @@
             class="q-px-md"
           />
           <q-btn
+            no-caps
+            label="Run Recoveries"
+            color="secondary"
+            class="q-px-lg"
+          />
+          <q-btn
+            no-caps
             label="Run Charges"
             color="positive"
             class="q-px-lg"
           />
+
         </q-card-actions>
       </q-card>
     </q-dialog>
