@@ -21,6 +21,7 @@ export enum Errors {
 
 export interface TokenMap {
   gender: string | null;
+  passwordChanged: string | null;
 }
 
 export interface AuthRequest {

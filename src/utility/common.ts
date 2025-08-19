@@ -37,49 +37,8 @@ export function useCommonUtility() {
   }
 
 
-  function lastLoginDate() {
-    if (getAuthData() == null)
-      return 'N/A';
-    return formatToTimestamp(getAuthData().lastLogonDate);
-  }
-
-  function getWhen(): string {
-    if (getAuthData() == null) {
-      return 'N/A';
-    }
-
-    const lastLogonDate = getAuthData().lastLogonDate;
-    if (!lastLogonDate) {
-      return 'Never logged in';
-    }
-
-    const now = moment();
-    const loginMoment = moment(lastLogonDate);
-    const formattedDate = loginMoment.format('DD/MM/YYYY hh:mm:ss A');
-
-    let narration: string;
-    const minutesDiff = now.diff(loginMoment, 'minutes');
-    const hoursDiff = now.diff(loginMoment, 'hours');
-    const daysDiff = now.diff(loginMoment, 'days');
-
-    if (minutesDiff < 1) {
-      narration = 'Just now';
-    } else if (minutesDiff < 60) {
-      narration = `${minutesDiff} minute(s) ago`;
-    } else if (hoursDiff < 24) {
-      narration = `${hoursDiff} hour(s) ago`;
-    } else if (daysDiff < 7) {
-      narration = `${daysDiff} day(s) ago`;
-    } else {
-      narration = 'A long time ago';
-    }
-
-    return `${formattedDate} (${narration})`;
-  }
-
   function formatProcessingDate() {
-    if(getAuthData() == null) return moment().format('ddd, MMM DD YYYY');
-    return moment(getAuthData().processDate).format('ddd, MMM DD YYYY');
+    return moment().format('ddd, MMM DD YYYY');
   }
 
 
@@ -127,11 +86,6 @@ export function useCommonUtility() {
 
   function isAuthenticated() {
     return getAuthData() != null;
-  }
-
-
-  function getDefaultDate() {
-    return moment(getAuthData().processDate).format('YYYY-MM-DD')
   }
 
 

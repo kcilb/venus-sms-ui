@@ -233,14 +233,14 @@ function processStage() {
     utility.storePasswordChangeFlag(data.passwordChanged);
   } else {
     utility.storePasswordChangeFlag("Y");
-    router.push('/modules');
+    router.push('/admin');
   }
 }
 
 async function onReset() {
   try {
     let request = {} as AuthRequest;
-    request.userName = resetState.value.username;
+    request.username = resetState.value.username;
     await authStore.reset(request);
     if (authStore.response.code !== '00') {
       alerts.showAlert(authStore.response);
