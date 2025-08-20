@@ -70,10 +70,24 @@
         :rows="filteredHistory"
         :columns="columns"
         row-key="id"
-        :loading="isLoading"
+        :loading="chargeStore.loading"
         :pagination="pagination"
         binary-state-sort
       >
+        <template v-slot:top>
+          <div class="row col-12">
+            <div class="col-8">
+              <q-btn @click="onClickFilter" icon="manage_search">
+                <q-tooltip>Custom Search</q-tooltip>
+              </q-btn>
+
+              <charge-filter @onDefineFilterCriteria="onClickSearch" :filterData="formData"></charge-filter>
+
+            </div>
+
+          </div>
+
+        </template>
         <template v-slot:header="props">
           <q-tr :props="props">
             <q-th
@@ -100,15 +114,16 @@
           </q-td>
         </template>
 
+
         <template #body-cell-recoveredAmt="props">
           <q-td :props="props" class="text-right">
-            {{ formatCurrency(props.row.recoveredAmt) }}
+            {{ utility.formatToAmount(props.row.recoveredAmt) }}
           </q-td>
         </template>
 
         <template #body-cell-createDt="props">
           <q-td :props="props">
-            {{ formatDateTime(props.row.createDt) }}
+            {{ utility.formatDate(props.row.createDt) }}
           </q-td>
         </template>
       </q-table>
@@ -167,12 +182,15 @@
           />
           <q-btn
             no-caps
+            disable
+            :loading="chargeStore.loading"
             @click="processSMSCharges(true)"
             label="Run Recoveries"
             color="secondary"
             class="q-px-lg"
           />
           <q-btn
+            :loading="chargeStore.loading"
             @click="processSMSCharges(false)"
             no-caps
             label="Run Charges"
@@ -190,15 +208,16 @@
 
 <script setup lang="ts">
 import {ref, computed, onMounted} from 'vue'
-import {format, useQuasar} from 'quasar'
-import {api} from 'boot/axios'
 import moment from "moment";
 import {ChargeHistory, ChargeProcessDTO, SmsAlertCurrency} from "components/models";
 import {useChargeStore} from "stores/charge-store";
 import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
+import {useDialogStore} from "stores/dialog-store";
+import ChargeFilter from "components/dialogs/ChargeFilter.vue";
 
 
+const dialogStore = useDialogStore();
 const chargeStore = useChargeStore();
 const alerts = useAlerts();
 const utility = useCommonUtility();
@@ -232,19 +251,15 @@ const selectedPeriod = computed(() => {
   return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
 })
 
-const $q = useQuasar()
-
-// Reactive state
 
 const filterStatus = ref<string | null>(null)
 
-const isLoading = ref(false)
 
 onMounted(() => {
   findChargeHistory();
 })
 
-// Constants
+
 const columns = [
   {
     name: 'createDt',
@@ -320,38 +335,25 @@ const isProcessing = computed(() => {
   return chargeStore.loading;
 })
 
+const formState = ref({
+  startDate: moment().format('YYYY-MM-DD'),
+  endDate: moment().format('YYYY-MM-DD')
+})
 
-const showNotification = (color: string, message: string) => {
-  $q.notify({
-    color,
-    message,
-    icon: color === 'positive' ? 'check_circle' : 'report_problem'
-  })
-}
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'COMPLETED':
+    case 'C':
       return 'positive'
-    case 'FAILED':
+    case 'F':
       return 'negative'
-    case 'PARTIAL':
+    case 'P':
       return 'warning'
     default:
       return 'grey'
   }
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount)
-}
-
-const formatDateTime = (dateString: string) => {
-  return new Date(dateString).toLocaleString()
-}
 const showDialog = ref(false);
 
 const showConfirmationDialog = () => {
@@ -363,6 +365,8 @@ const showConfirmationDialog = () => {
 async function findChargeHistory() {
   try {
     let request = {} as ChargeProcessDTO;
+    request.startDate = formState.value.startDate;
+    request.endDate = formState.value.endDate;
     await chargeStore.findChargeHistory(request);
     if (chargeStore.response.code !== '0') {
       alerts.showAlert(chargeStore.response);
@@ -385,6 +389,24 @@ async function processSMSCharges(isRecover: boolean) {
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }
+}
+
+function onClickSearch(filter: any) {
+  formState.value.startDate = filter.startDate;
+  formState.value.endDate = filter.endDate;
+  findChargeHistory();
+  dialogStore.filter = !dialogStore.filter;
+}
+
+const formData = ref({
+  startDate: null,
+  endDate: null
+})
+
+
+function onClickFilter() {
+  dialogStore.filter = !dialogStore.filter;
+  formData.value = formState.value;
 }
 
 

@@ -50,7 +50,7 @@ export const useChargeStore = defineStore('charges', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('auth/find-charge-history', request, {
+        await api.post('charges/find-charge-history', request, {
           headers: {
             'Content-Type': 'application/json'
           }

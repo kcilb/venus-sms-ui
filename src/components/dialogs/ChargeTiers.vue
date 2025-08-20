@@ -118,9 +118,11 @@ import {useAlerts} from "src/utility/alerts";
 import {ChargeTierRequest, ChargeTiers} from "components/models";
 import moment from "moment";
 import {useCommonUtility} from "src/utility/common";
+import {useChargeStore} from "stores/charge-store";
 
 const dialogStore = useDialogStore();
 const adminStore = useAdminOfficesStore();
+const chargeStore =- useChargeStore();
 const alerts = useAlerts();
 const utility = useCommonUtility();
 const props = defineProps(['currencyData']);

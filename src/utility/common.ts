@@ -130,7 +130,8 @@ export function useCommonUtility() {
     storePasswordChangeFlag,
     removePassword,
     formatDate,
-    getAuthData
+    getAuthData,
+    formatToAmount
   }
 }
 
