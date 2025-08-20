@@ -20,6 +20,7 @@ export enum Errors {
 
 
 export interface TokenMap {
+  loginId: string | null;
   gender: string | null;
   passwordChanged: string | null;
 }
@@ -140,4 +141,22 @@ export interface ChargeTierRequest {
   smsAlertCrncyId: number;
   chargeTiers: ChargeTiers[];
   isEdit: boolean;
+}
+
+export interface ChargeProcessDTO {
+  isAutoRecoveryInitiated: boolean;
+  resultSetView: string;
+  startDate: String;
+  endDate: String;
+}
+
+export interface SmsChargeLog {
+  totalAccounts: number | null;
+  lowFundsCount: number | null;
+  processedCount: number | null;
+  failedCount: number | null;
+  recoveredAmt: number | null;
+  chargeDesc: string | null;
+  createDt: Date | null;
+  status: string | null;
 }

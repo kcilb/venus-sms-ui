@@ -167,11 +167,13 @@
           />
           <q-btn
             no-caps
+            @click="processSMSCharges(true)"
             label="Run Recoveries"
             color="secondary"
             class="q-px-lg"
           />
           <q-btn
+            @click="processSMSCharges(false)"
             no-caps
             label="Run Charges"
             color="positive"
@@ -191,8 +193,15 @@ import {ref, computed, onMounted} from 'vue'
 import {format, useQuasar} from 'quasar'
 import {api} from 'boot/axios'
 import moment from "moment";
-import {ChargeHistory} from "components/models";
+import {ChargeHistory, ChargeProcessDTO, SmsAlertCurrency} from "components/models";
+import {useChargeStore} from "stores/charge-store";
+import {useAlerts} from "src/utility/alerts";
+import {useCommonUtility} from "src/utility/common";
 
+
+const chargeStore = useChargeStore();
+const alerts = useAlerts();
+const utility = useCommonUtility();
 
 const selectedMonth = ref<number | null>(null)
 const selectedYear = ref<number | null>(null)
@@ -226,10 +235,14 @@ const selectedPeriod = computed(() => {
 const $q = useQuasar()
 
 // Reactive state
-const chargeHistory = ref<ChargeHistory[]>([])
+
 const filterStatus = ref<string | null>(null)
-const isProcessing = ref(false)
+
 const isLoading = ref(false)
+
+onMounted(() => {
+  findChargeHistory();
+})
 
 // Constants
 const columns = [
@@ -298,10 +311,13 @@ const pagination = {
   rowsPerPage: 10
 }
 
-// Computed properties
+
 const filteredHistory = computed(() => {
-  if (!filterStatus.value) return chargeHistory.value
-  return chargeHistory.value.filter(item => item.status === filterStatus.value)
+  return chargeStore.chargeHistoryList;
+})
+
+const isProcessing = computed(() => {
+  return chargeStore.loading;
 })
 
 
@@ -341,6 +357,34 @@ const showDialog = ref(false);
 const showConfirmationDialog = () => {
   if (!selectedMonth.value || !selectedYear.value) return
   showDialog.value = true
+}
+
+
+async function findChargeHistory() {
+  try {
+    let request = {} as ChargeProcessDTO;
+    await chargeStore.findChargeHistory(request);
+    if (chargeStore.response.code !== '0') {
+      alerts.showAlert(chargeStore.response);
+      return;
+    }
+  } catch (e) {
+    alerts.showAlert(utility.getError(e));
+  }
+}
+
+async function processSMSCharges(isRecover: boolean) {
+  try {
+    let request = {} as ChargeProcessDTO;
+    request.isAutoRecoveryInitiated = isRecover;
+    await chargeStore.processSMSCharges(request);
+    if (chargeStore.response.code !== '0') {
+      alerts.showAlert(chargeStore.response);
+      return;
+    }
+  } catch (e) {
+    alerts.showAlert(utility.getError(e));
+  }
 }
 
 

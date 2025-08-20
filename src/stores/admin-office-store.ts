@@ -266,33 +266,6 @@ export const useAdminOfficesStore = defineStore('admin', {
     },
 
 
-//
-// // Methods
-//     const fetchChargeHistory = async () => {
-//       try {
-//         isLoading.value = true
-//         const {data} = await api.get<ChargeHistory[]>('/api/charges/history')
-//         chargeHistory.value = data
-//       } catch (error) {
-//         showNotification('negative', 'Failed to load charge history')
-//       } finally {
-//         isLoading.value = false
-//       }
-//     }
-//
-//     const runMonthlyCharges = async () => {
-//       isProcessing.value = true
-//       try {
-//         await api.post('/api/charges/run-monthly')
-//         showNotification('positive', 'Monthly charges processed successfully')
-//         await fetchChargeHistory() // Refresh data
-//       } catch (error) {
-//         showNotification('negative', 'Failed to process monthly charges')
-//       } finally {
-//         isProcessing.value = false
-//       }
-//     }
-
 
   }
 });
