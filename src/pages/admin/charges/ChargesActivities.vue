@@ -227,9 +227,9 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import moment from "moment";
-import {ChargeHistory, ChargeProcessDTO, Response, SmsAlertCurrency} from "components/models";
+import {ChargeProcessDTO, Response, SmsAlertCurrency} from "components/models";
 import {useChargeStore} from "stores/charge-store";
 import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
@@ -359,6 +359,10 @@ const currencyOptions = computed(() => {
   return adminStore.currencyList.filter(f => f.status == "A")
 })
 
+
+const filteredHistory = computed(() => {
+  return chargeStore.chargeHistoryList;
+})
 
 const isProcessing = computed(() => {
   return chargeStore.loading;
