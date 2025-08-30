@@ -360,18 +360,6 @@ const currencyOptions = computed(() => {
 })
 
 
-// Updated filteredHistory to include currency filtering
-const filteredHistory = computed(() => {
-  let history = chargeStore.chargeHistoryList;
-
-  // Filter by currency if selected
-  if (selectedCurrency.value) {
-    history = history.filter(item => item.currencyId === selectedCurrency.value);
-  }
-
-  return history;
-})
-
 const isProcessing = computed(() => {
   return chargeStore.loading;
 })
