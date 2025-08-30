@@ -1,5 +1,4 @@
 <template>
-
   <q-card bordered flat style="background: none" class="q-ma-lg">
     <q-card class="row col-12" flat>
       <q-toolbar class="q-pa-sm text-h6 bg-grey-4">
@@ -25,6 +24,19 @@
             :options="yearOptions"
             label="Year"
             style="min-width: 100px"
+            outlined
+            dense
+            emit-value
+            map-options
+          />
+          <q-select
+            dropdown-icon="expand_more"
+            v-model="selectedCurrency"
+            :options="currencyOptions"
+            option-label="crncyIso"
+            option-value="smsAlertCrncyId"
+            label="Currency"
+            style="min-width: 120px"
             outlined
             dense
             emit-value
@@ -113,11 +125,15 @@
             </q-badge>
           </q-td>
         </template>
-
+        <template #body-cell-currency="props">
+          <q-td :props="props">
+            {{ props.row.currency }}
+          </q-td>
+        </template>
 
         <template #body-cell-recoveredAmt="props">
           <q-td :props="props" class="text-right">
-            {{ utility.formatToAmount(props.row.recoveredAmt) }}
+            {{ utility.formatToAmount(props.row.recoveredAmt) }} {{ props.row.currency }}
           </q-td>
         </template>
 
@@ -140,15 +156,22 @@
               class="q-ml-sm"
             />
           </div>
-
         </q-card-section>
 
         <q-card-section class="q-pt-md">
           <div class="row items-center q-mb-sm">
             <q-icon name="calendar_month" color="grey" size="md"/>
             <span class="q-ml-sm text-body1">
-          Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
-        </span>
+            Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
+          </span>
+          </div>
+
+          <!-- Currency Display in Dialog -->
+          <div class="row items-center q-mb-sm" v-if="selectedCurrency">
+            <q-icon name="payments" color="grey" size="md"/>
+            <span class="q-ml-sm text-body1">
+            Currency: <strong>{{ selectedCurrencyLabel }}</strong>
+          </span>
           </div>
 
           <q-separator spaced/>
@@ -197,13 +220,10 @@
             color="positive"
             class="q-px-lg"
           />
-
         </q-card-actions>
       </q-card>
     </q-dialog>
-
   </q-card>
-
 </template>
 
 <script setup lang="ts">
@@ -215,15 +235,17 @@ import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
 import {useDialogStore} from "stores/dialog-store";
 import ChargeFilter from "components/dialogs/ChargeFilter.vue";
-
+import {useAdminOfficesStore} from "stores/admin-office-store";
 
 const dialogStore = useDialogStore();
 const chargeStore = useChargeStore();
 const alerts = useAlerts();
 const utility = useCommonUtility();
+const adminStore = useAdminOfficesStore();
 
 const selectedMonth = ref<number | null>(null)
 const selectedYear = ref<number | null>(null)
+const selectedCurrency = ref<number | null>(null) // Added currency ref
 
 
 const monthOptions = Array.from({length: 12}, (_, i) => ({
@@ -251,15 +273,21 @@ const selectedPeriod = computed(() => {
   return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
 })
 
+// Get the label for the selected currency
+const selectedCurrencyLabel = computed(() => {
+  if (!selectedCurrency.value) return 'All Currencies'
+  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === selectedCurrency.value)
+  return currency ? currency.crncyNm : selectedCurrency.value
+})
 
 const filterStatus = ref<string | null>(null)
 
-
-onMounted(() => {
-  findChargeHistory();
+onMounted(async () => {
+  await findSmsAlertCurrencies();
+  await findChargeHistory();
 })
 
-
+// Updated columns to include currency
 const columns = [
   {
     name: 'createDt',
@@ -273,6 +301,12 @@ const columns = [
     label: 'Description',
     field: 'chargeDesc',
     align: 'left'
+  },
+  {
+    name: 'currency',
+    label: 'Currency',
+    field: 'currency',
+    align: 'center'
   },
   {
     name: 'totalAccounts',
@@ -327,8 +361,21 @@ const pagination = {
 }
 
 
+const currencyOptions = computed(() => {
+  return adminStore.currencyList.filter(f => f.status == "A")
+})
+
+
+// Updated filteredHistory to include currency filtering
 const filteredHistory = computed(() => {
-  return chargeStore.chargeHistoryList;
+  let history = chargeStore.chargeHistoryList;
+
+  // Filter by currency if selected
+  if (selectedCurrency.value) {
+    history = history.filter(item => item.currencyId === selectedCurrency.value);
+  }
+
+  return history;
 })
 
 const isProcessing = computed(() => {
@@ -339,7 +386,6 @@ const formState = ref({
   startDate: moment().format('YYYY-MM-DD'),
   endDate: moment().format('YYYY-MM-DD')
 })
-
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -362,11 +408,28 @@ const showConfirmationDialog = () => {
 }
 
 
+async function findSmsAlertCurrencies() {
+  try {
+    let request = {} as SmsAlertCurrency;
+    await adminStore.findSmsAlertCurrencies(request);
+    if (adminStore.response.code !== '0') {
+      alerts.showAlert(adminStore.response);
+      return;
+    }
+  } catch (e) {
+    alerts.showAlert(utility.getError(e));
+  }
+}
+
 async function findChargeHistory() {
   try {
     let request = {} as ChargeProcessDTO;
     request.startDate = formState.value.startDate;
     request.endDate = formState.value.endDate;
+    // Add currency to request if needed
+    if (selectedCurrency.value) {
+      request.currencyId = selectedCurrency.value;
+    }
     await chargeStore.findChargeHistory(request);
     if (chargeStore.response.code !== '0') {
       alerts.showAlert(chargeStore.response);
@@ -381,6 +444,10 @@ async function processSMSCharges(isRecover: boolean) {
   try {
     let request = {} as ChargeProcessDTO;
     request.isAutoRecoveryInitiated = isRecover;
+    // Add currency to request if needed
+    if (selectedCurrency.value) {
+      request.currencyId = selectedCurrency.value;
+    }
     await chargeStore.processSMSCharges(request);
     if (chargeStore.response.code !== '0') {
       alerts.showAlert(chargeStore.response);
@@ -394,22 +461,28 @@ async function processSMSCharges(isRecover: boolean) {
 function onClickSearch(filter: any) {
   formState.value.startDate = filter.startDate;
   formState.value.endDate = filter.endDate;
+  // Add currency to filter if needed
+  if (filter.currency) {
+    selectedCurrency.value = filter.currency;
+  }
   findChargeHistory();
   dialogStore.filter = !dialogStore.filter;
 }
 
 const formData = ref({
   startDate: null,
-  endDate: null
+  endDate: null,
+  currency: null // Added currency to formData
 })
-
 
 function onClickFilter() {
   dialogStore.filter = !dialogStore.filter;
-  formData.value = formState.value;
+  formData.value = {
+    startDate: formState.value.startDate,
+    endDate: formState.value.endDate,
+    currencyId: selectedCurrency.value
+  };
 }
-
-
 </script>
 
 <style scoped>

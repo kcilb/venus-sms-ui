@@ -144,6 +144,7 @@ export interface ChargeTierRequest {
 }
 
 export interface ChargeProcessDTO {
+  currencyId:number,
   isAutoRecoveryInitiated: boolean;
   resultSetView: string;
   startDate: String;
