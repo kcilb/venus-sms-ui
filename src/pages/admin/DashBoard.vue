@@ -32,7 +32,6 @@
               unelevated
               color="blue-grey-7"
               label="Manage"
-              to="/users"
               size="sm"
               class="text-capitalize"
             />
@@ -52,7 +51,6 @@
               unelevated
               color="cyan-8"
               label="Manage"
-              to="/alerts"
               size="sm"
               class="text-capitalize"
             />
@@ -72,7 +70,7 @@
               unelevated
               color="orange-8"
               label="Run Now"
-              to="/run-charges"
+              to="admin/charges"
               size="sm"
               class="text-capitalize"
             />
@@ -92,7 +90,6 @@
               unelevated
               color="purple-8"
               label="View"
-              to="/audit"
               size="sm"
               class="text-capitalize"
             />
@@ -167,43 +164,7 @@ const utility = useCommonUtility();
 
 const leftDrawerOpen = ref(false);
 
-const recentActivities = ref([
-  {
-    id: 1,
-    action: 'User Login',
-    user: 'admin@example.com',
-    time: '2023-05-15 09:23:45',
-    status: 'Success'
-  },
-  {
-    id: 2,
-    action: 'Alert Sent',
-    user: 'system',
-    time: '2023-05-15 08:45:12',
-    status: 'Success'
-  },
-  {
-    id: 3,
-    action: 'Charge Run',
-    user: 'finance@example.com',
-    time: '2023-05-15 08:30:00',
-    status: 'Completed'
-  },
-  {
-    id: 4,
-    action: 'Role Updated',
-    user: 'admin@example.com',
-    time: '2023-05-14 17:12:33',
-    status: 'Success'
-  },
-  {
-    id: 5,
-    action: 'Failed Login',
-    user: 'unknown@example.com',
-    time: '2023-05-14 16:45:21',
-    status: 'Failed'
-  }
-]);
+const recentActivities = ref([]);
 
 const activityColumns = ref([
   {name: 'action', label: 'Action', field: 'action', align: 'left'},
