@@ -144,17 +144,17 @@ const menuItems =
     },
     {
       name: 'Users', icon: 'group', route: '/admin/users',
-      activeRoutes: ['UserList', 'CreateUser', 'EditUser'], available: true
+      activeRoutes: ['UserList', 'CreateUser', 'EditUser'], available: false
       , subtitle: 'set up users'
     },
     {
       name: 'Roles', icon: 'add_moderator', route: '/admin/roles',
-      activeRoutes: ['RoleList', 'CreateRole', 'EditRole'], available: true
+      activeRoutes: ['RoleList', 'CreateRole', 'EditRole'], available: false
       , subtitle: 'set up application roles'
     },
     {
       name: 'Alerts', icon: 'notifications', route: '/admin/alerts',
-      activeRoutes: ['AlertList', 'CreateAlert', 'EditAlert'], available: true
+      activeRoutes: ['AlertList', 'CreateAlert', 'EditAlert'], available: false
       , subtitle: 'set up alerts'
     },
     {
@@ -169,12 +169,12 @@ const menuItems =
     },
     {
       name: 'Charge History', icon: 'business', route: '/admin/branches',
-      activeRoutes: ['ChargeHistory'], available: true
+      activeRoutes: ['ChargeHistory'], available: false
       , subtitle: 'view charge history'
     },
     {
       name: 'Audit', icon: 'content_paste_search', route: '/admin/audit',
-      activeRoutes: ['AuditHistory'], available: true
+      activeRoutes: ['AuditHistory'], available: false
       , subtitle: 'view user activities history'
     },
   ]

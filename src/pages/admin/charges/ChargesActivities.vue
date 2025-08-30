@@ -229,7 +229,7 @@
 <script setup lang="ts">
 import {ref, computed, onMounted} from 'vue'
 import moment from "moment";
-import {ChargeHistory, ChargeProcessDTO, SmsAlertCurrency} from "components/models";
+import {ChargeHistory, ChargeProcessDTO, Response, SmsAlertCurrency} from "components/models";
 import {useChargeStore} from "stores/charge-store";
 import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
@@ -301,12 +301,6 @@ const columns = [
     label: 'Description',
     field: 'chargeDesc',
     align: 'left'
-  },
-  {
-    name: 'currency',
-    label: 'Currency',
-    field: 'currency',
-    align: 'center'
   },
   {
     name: 'totalAccounts',
@@ -403,6 +397,15 @@ const getStatusColor = (status: string) => {
 const showDialog = ref(false);
 
 const showConfirmationDialog = () => {
+  if (!selectedCurrency.value) {
+    let resp = {
+      code: '403',
+      message: 'Please select currency'
+    } as Response
+    alerts.showAlert(resp);
+    return;
+  }
+
   if (!selectedMonth.value || !selectedYear.value) return
   showDialog.value = true
 }
@@ -442,6 +445,7 @@ async function findChargeHistory() {
 
 async function processSMSCharges(isRecover: boolean) {
   try {
+
     let request = {} as ChargeProcessDTO;
     request.isAutoRecoveryInitiated = isRecover;
     // Add currency to request if needed
