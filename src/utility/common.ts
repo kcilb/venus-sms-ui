@@ -2,6 +2,7 @@ import {ApiResponse, Errors, Response, TokenMap} from "components/models";
 import {jwtDecode} from "jwt-decode";
 import CryptoJS from 'crypto-js/index';
 import moment from "moment";
+import {saveAs} from "file-saver";
 
 export function useCommonUtility() {
 
@@ -84,6 +85,17 @@ export function useCommonUtility() {
     return CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8) as any;
   }
 
+  function saveFile(fileDownLoad:any, fileName:any, exportType:any) {
+    let fileEncodeFormat
+    if (exportType === 'EXCEL') {
+      fileEncodeFormat = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+    } else {
+      fileEncodeFormat = 'data:application/pdf;base64,';
+    }
+    let downLoadURL = fileEncodeFormat + fileDownLoad;
+    saveAs(downLoadURL, fileName);
+  }
+
   function isAuthenticated() {
     return getAuthData() != null;
   }
@@ -131,7 +143,8 @@ export function useCommonUtility() {
     removePassword,
     formatDate,
     getAuthData,
-    formatToAmount
+    formatToAmount,
+    saveFile
   }
 }
 

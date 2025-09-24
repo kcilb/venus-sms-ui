@@ -449,6 +449,11 @@ async function processSMSCharges(isRecover: boolean) {
       alerts.showAlert(chargeStore.response);
       return;
     }
+    alerts.showAlert(chargeStore.response);
+    showDialog.value = !showDialog.value;
+    utility.saveFile(chargeStore.apiResponse.data.encodedFileData,
+      chargeStore.apiResponse.data.fileName, "PDF");
+
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }
