@@ -162,16 +162,31 @@
           <div class="row items-center q-mb-sm">
             <q-icon name="calendar_month" color="grey" size="md"/>
             <span class="q-ml-sm text-body1">
-            Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
-          </span>
+          Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
+        </span>
           </div>
 
-          <!-- Currency Display in Dialog -->
           <div class="row items-center q-mb-sm" v-if="selectedCurrency">
             <q-icon name="payments" color="grey" size="md"/>
             <span class="q-ml-sm text-body1">
-            Currency: <strong>{{ selectedCurrencyLabel }}</strong>
-          </span>
+          Currency: <strong>{{ selectedCurrencyLabel }}</strong>
+        </span>
+          </div>
+
+          <q-separator spaced/>
+
+          <div class="q-mt-md">
+            <q-checkbox
+              v-model="isRecoveryMode"
+              label="Run as Recoveries"
+              color="secondary"
+              class="q-mb-sm"
+            />
+            <div class="text-caption text-grey-7 q-ml-lg">
+              {{ isRecoveryMode ?
+              'Process outstanding charges from previous periods' :
+              'Process regular monthly charges for current period' }}
+            </div>
           </div>
 
           <q-separator spaced/>
@@ -181,7 +196,8 @@
             This operation will:
           </div>
           <ul class="q-pl-md q-mt-sm">
-            <li>Apply charges to all eligible accounts</li>
+            <li v-if="isRecoveryMode">Apply recovery charges for outstanding amounts</li>
+            <li v-else>Apply charges to all eligible accounts</li>
             <li>Generate transaction records</li>
             <li>Update account balances</li>
           </ul>
@@ -204,20 +220,11 @@
             class="q-px-md"
           />
           <q-btn
-            no-caps
-            disable
             :loading="chargeStore.loading"
-            @click="processSMSCharges(true)"
-            label="Run Recoveries"
-            color="secondary"
-            class="q-px-lg"
-          />
-          <q-btn
-            :loading="chargeStore.loading"
-            @click="processSMSCharges(false)"
+            @click="processSMSCharges"
             no-caps
-            label="Run Charges"
-            color="positive"
+            :label="isRecoveryMode ? 'Run Recoveries' : 'Run Charges'"
+            :color="isRecoveryMode ? 'secondary' : 'positive'"
             class="q-px-lg"
           />
         </q-card-actions>
@@ -243,6 +250,7 @@ const alerts = useAlerts();
 const utility = useCommonUtility();
 const adminStore = useAdminOfficesStore();
 
+const isRecoveryMode = ref(false);
 const selectedMonth = ref<number | null>(null)
 const selectedYear = ref<number | null>(null)
 const selectedCurrency = ref<number | null>(null) // Added currency ref
@@ -435,11 +443,11 @@ async function findChargeHistory() {
   }
 }
 
-async function processSMSCharges(isRecover: boolean) {
+async function processSMSCharges() {
   try {
 
     let request = {} as ChargeProcessDTO;
-    request.isAutoRecoveryInitiated = isRecover;
+    request.isAutoRecoveryInitiated = isRecoveryMode.value;
     // Add currency to request if needed
     if (selectedCurrency.value) {
       request.currencyId = selectedCurrency.value;
