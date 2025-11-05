@@ -58,7 +58,9 @@ const routes: RouteRecordRaw[] = [
 
       {path: 'charges', component: () => import('pages/admin/charges/ChargesActivities.vue'), name: 'RunCharge'},
 
-    ]
+
+    ],
+    beforeEnter: [isAuthenticated]
   },
 
   // Always leave this as last one,

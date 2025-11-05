@@ -6,29 +6,29 @@
       </q-toolbar>
       <div class="row col-12 q-pa-lg items-center q-gutter-md">
         <div class="row items-center q-gutter-sm">
-          <q-select
-            v-model="selectedMonth"
-            input-style="font-size:bold"
-            dropdown-icon="expand_more"
-            :options="monthOptions"
-            label="Month"
-            style="min-width: 120px"
-            outlined
-            dense
-            emit-value
-            map-options
-          />
-          <q-select
-            dropdown-icon="expand_more"
-            v-model="selectedYear"
-            :options="yearOptions"
-            label="Year"
-            style="min-width: 100px"
-            outlined
-            dense
-            emit-value
-            map-options
-          />
+<!--          <q-select-->
+<!--            v-model="selectedMonth"-->
+<!--            input-style="font-size:bold"-->
+<!--            dropdown-icon="expand_more"-->
+<!--            :options="monthOptions"-->
+<!--            label="Month"-->
+<!--            style="min-width: 120px"-->
+<!--            outlined-->
+<!--            dense-->
+<!--            emit-value-->
+<!--            map-options-->
+<!--          />-->
+<!--          <q-select-->
+<!--            dropdown-icon="expand_more"-->
+<!--            v-model="selectedYear"-->
+<!--            :options="yearOptions"-->
+<!--            label="Year"-->
+<!--            style="min-width: 100px"-->
+<!--            outlined-->
+<!--            dense-->
+<!--            emit-value-->
+<!--            map-options-->
+<!--          />-->
           <q-select
             dropdown-icon="expand_more"
             v-model="selectedCurrency"
