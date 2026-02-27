@@ -288,7 +288,7 @@ const selectedCurrencyLabel = computed(() => {
   return currency ? currency.crncyNm : selectedCurrency.value
 })
 
-const filterStatus = ref<string | null>(null)
+const filterStatus = ref<string | null>(null);
 
 onMounted(async () => {
   await findSmsAlertCurrencies();
@@ -410,19 +410,6 @@ const showConfirmationDialog = () => {
   showDialog.value = true
 }
 
-
-async function findSmsAlertCurrencies() {
-  try {
-    let request = {} as SmsAlertCurrency;
-    await adminStore.findSmsAlertCurrencies(request);
-    if (adminStore.response.code !== '0') {
-      alerts.showAlert(adminStore.response);
-      return;
-    }
-  } catch (e) {
-    alerts.showAlert(utility.getError(e));
-  }
-}
 
 async function findChargeHistory() {
   try {

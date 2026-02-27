@@ -1,0 +1,14 @@
+{
+  "baseurl": "https://172.16.13.6:8081/apis/v2/",
+  "timeout": 30000,
+  "endpoints": {
+    "login": "/auth/login",
+    "reset": "/auth/reset",
+    "change": "/auth/change"
+  },
+  "excludeAuthFor": [
+    "auth/login",
+    "auth/reset",
+    "auth/change"
+  ]
+}

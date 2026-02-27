@@ -13,6 +13,7 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@quasar/extras": "^1.16.4",
     "@types/crypto-js": "^4.2.2",
     "axios": "^1.2.1",

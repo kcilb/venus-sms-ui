@@ -40,10 +40,32 @@ export interface ChangeRequest {
   confirmPassword: string | null;
 }
 
+export interface ProgressDTO {
+  processId: string;
+  fileInfo: Map<string,string>;
+  processedCount: number;
+  totalCount: number;
+  percentage: number;
+  batchNumber: number;
+  totalBatches: number;
+  status: string;
+  timestamp: string;
+  estimatedTimeRemaining?: string;
+  metadata?: ProgressMetadata;
+}
+
+export interface ProgressMetadata {
+  message?: string;
+  startTime?: string;
+
+  [key: string]: unknown;
+}
+
+
 
 export interface Response {
-  code: string | null;
-  message: string | null;
+  code: string;
+  message: string;
 }
 
 export interface ApiResponse<T> {

@@ -1,5 +1,5 @@
 import {defineStore, acceptHMRUpdate} from 'pinia';
-import {api} from "boot/axios";
+import {apiClient} from "boot/axios";
 import {reactive} from "vue";
 import {ApiResponse, Response, AuthRequest, User, ChangeRequest} from "components/models";
 import {useCommonUtility} from "src/utility/common";
@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('auth/login', request, {
+        await apiClient.post('auth/login', request, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('auth/resetUserPassword', request, {
+        await apiClient.post('auth/resetUserPassword', request, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.response = {} as any;
       try {
-        await api.post('auth/change', request, {
+        await apiClient.post('auth/change', request, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       this.response = {} as any;
       try {
-        await api.post('auth/resetUserPassword', request, {
+        await apiClient.post('auth/resetUserPassword', request, {
           headers: {
             'Content-Type': 'application/json'
           }

@@ -1,61 +1,111 @@
-import {defineBoot} from '#q-app/wrappers';
-import axios, {type AxiosInstance} from 'axios';
-import {useCommonUtility} from "src/utility/common";
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import axios from 'axios';
+import { boot } from 'quasar/wrappers';
 
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $axios: AxiosInstance;
-    $api: AxiosInstance;
+interface ApiConfig {
+  baseurl: string;
+  timeout?: number;
+  headers?: Record<string, string>;
+  excludeAuthFor?: string[];
+}
+
+let apiClient: AxiosInstance;
+
+const DEFAULT_EXCLUDE_AUTH_ENDPOINTS = ['/auth/login', '/auth/reset', '/auth/change'];
+
+function shouldExcludeAuth(url: string, excludeList: string[]): boolean {
+  return excludeList.some((pattern) => {
+    // Exact match
+    if (pattern === url) return true;
+    // Wildcard pattern
+    if (pattern.includes('*')) {
+      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+      return regex.test(url);
+    }
+    return false;
+  });
+}
+
+async function initializeApiClient(): Promise<AxiosInstance> {
+  try {
+
+    const configPath = process.env.NODE_ENV == 'production' ? '/venus-ui/api-config.json'
+      : './api-config.json';
+    const response: AxiosResponse<ApiConfig> = await axios.get(configPath);
+    const config = response.data;
+
+    apiClient = axios.create({
+      baseURL: config.baseurl,
+      timeout: config.timeout || 10000,
+      headers: config.headers || {},
+    });
+
+    // Get the list of endpoints to exclude from auth
+    const excludeAuthEndpoints = config.excludeAuthFor || DEFAULT_EXCLUDE_AUTH_ENDPOINTS;
+
+    // Add request interceptor for auth
+    apiClient.interceptors.request.use(
+      (config) => {
+        const url = config.url || '';
+
+        // Check if this URL should exclude auth
+        if (shouldExcludeAuth(url, excludeAuthEndpoints)) {
+          return config; // Skip adding auth header
+        }
+
+        let username = "neptune";
+        let password = "p@ssw0rd";
+        if (username && password) {
+          const credentials = `${username}:${password}`;
+          const base64Credentials = btoa(credentials);
+          config.headers.Authorization = `Basic ${base64Credentials}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+    );
+
+    return apiClient;
+  } catch (error) {
+    console.error('Failed to load API config, using defaults:', error);
+
+    // Fallback to defaults
+    apiClient = axios.create({
+      baseURL: process.env.API_BASE_URL || 'http://localhost:8081',
+      timeout: 10000,
+    });
+
+    apiClient.interceptors.request.use(
+      (config) => {
+        const url = config.url || '';
+
+        if (shouldExcludeAuth(url, DEFAULT_EXCLUDE_AUTH_ENDPOINTS)) {
+          return config;
+        }
+
+        let username = "neptune";
+        let password = "p@ssw0rd";
+        if (username && password) {
+          const credentials = `${username}:${password}`;
+          const base64Credentials = btoa(credentials);
+          config.headers.Authorization = `Basic ${base64Credentials}`;
+        }
+
+        return config;
+      },
+      (error) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+    );
+
+    return apiClient;
   }
 }
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-//172.16.13.6
-const api = axios.create({baseURL: 'https://172.16.13.6:8081/apis/v2/'});
+export default boot(async ({ app }) => {
+  await initializeApiClient();
 
-export default defineBoot(({app}) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
+  // Make axios available globally in Vue components
   app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
-  app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
+  app.config.globalProperties.$api = apiClient;
 });
 
-
-const excludedPaths = ['/login', '/reset', '/password-change'];
-const utility = useCommonUtility();
-
-api.interceptors.request.use(function (config) {
-  //const token = utility.getTokenData();
-  const shouldExclude = excludedPaths.some((path) =>
-    config.url?.startsWith(path)
-  );
-
-  if (!shouldExclude) {
-    let username = "neptune";
-    let password = "p@ssw0rd";
-    if (username && password) {
-      const credentials = `${username}:${password}`;
-      const base64Credentials = btoa(credentials);
-      config.headers.Authorization = `Basic ${base64Credentials}`;
-    }
-  }
-  if (!config.headers['Content-Type']) {
-    config.headers['Content-Type'] = 'application/json';
-  }
-
-  return config;
-}, function (error) {
-  return Promise.reject(error);
-});
-
-export {api};
+export { apiClient, initializeApiClient };

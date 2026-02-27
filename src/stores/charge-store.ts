@@ -1,5 +1,5 @@
 import {defineStore, acceptHMRUpdate} from 'pinia';
-import {api} from "boot/axios";
+import {apiClient} from "boot/axios";
 import {reactive, ref} from "vue";
 import {
   ApiResponse,
@@ -30,7 +30,7 @@ export const useChargeStore = defineStore('charges', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('charges/process-charges', request, {
+        await apiClient.post('charges/process-charges', request, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -50,7 +50,7 @@ export const useChargeStore = defineStore('charges', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('charges/find-charge-history', request, {
+        await apiClient.post('charges/find-charge-history', request, {
           headers: {
             'Content-Type': 'application/json'
           }

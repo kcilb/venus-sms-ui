@@ -5,7 +5,7 @@ import {
   Response, Roles, SmsAlertCurrency,
   User
 } from "components/models";
-import {api} from "boot/axios";
+import {apiClient} from "boot/axios";
 import {useCommonUtility} from "src/utility/common";
 
 
@@ -39,7 +39,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.chargeTierList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-currency-charge-tier', request, {
+        await apiClient.post('admin/find-currency-charge-tier', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -57,7 +57,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('admin/maintain-currency-charge-tier', request, {
+        await apiClient.post('admin/maintain-currency-charge-tier', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.response = response.data;
@@ -74,7 +74,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.currencyList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-currency', request, {
+        await apiClient.post('admin/find-currency', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -94,7 +94,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.currencyList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-currency', request, {
+        await apiClient.post('admin/find-currency', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -113,7 +113,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.currencyList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-sms-alert-currencies', request, {
+        await apiClient.post('admin/find-sms-alert-currencies', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -137,7 +137,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       request.createdBy = 'TEST';
       request.modifiedBy = 'TEST';
       try {
-        await api.post('admin/maintain-currency', request, {
+        await apiClient.post('admin/maintain-currency', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.response = response.data;
@@ -154,7 +154,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.userList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-user', request, {
+        await apiClient.post('admin/find-user', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -173,7 +173,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('admin/find-user-by-uuid', request, {
+        await apiClient.post('admin/find-user-by-uuid', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -194,7 +194,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       request.createdBy = utility.getAuthData().loginId;
       request.modifiedBy = utility.getAuthData().loginId;
       try {
-        await api.post('admin/maintain-user', request, {
+        await apiClient.post('admin/maintain-user', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -213,7 +213,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.roleList = [];
       this.loading = true;
       try {
-        await api.post('admin/find-user-role', request, {
+        await apiClient.post('admin/find-user-role', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -232,7 +232,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       this.apiResponse = {} as any;
       this.loading = true;
       try {
-        await api.post('admin/find-user-role-by-uuid', request, {
+        await apiClient.post('admin/find-user-role-by-uuid', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.apiResponse = response.data;
@@ -253,7 +253,7 @@ export const useAdminOfficesStore = defineStore('admin', {
       request.createdBy = utility.getAuthData().loginId;
       request.modifiedBy = utility.getAuthData().loginId;
       try {
-        await api.post('admin/maintain-user-role', request, {
+        await apiClient.post('admin/maintain-user-role', request, {
           headers: {'Content-Type': 'application/json'}
         }).then(response => {
           this.response = response.data;
@@ -264,7 +264,6 @@ export const useAdminOfficesStore = defineStore('admin', {
         this.loading = false;
       }
     },
-
 
 
   }
