@@ -6,29 +6,6 @@
       </q-toolbar>
       <div class="row col-12 q-pa-lg items-center q-gutter-md">
         <div class="row items-center q-gutter-sm">
-<!--          <q-select-->
-<!--            v-model="selectedMonth"-->
-<!--            input-style="font-size:bold"-->
-<!--            dropdown-icon="expand_more"-->
-<!--            :options="monthOptions"-->
-<!--            label="Month"-->
-<!--            style="min-width: 120px"-->
-<!--            outlined-->
-<!--            dense-->
-<!--            emit-value-->
-<!--            map-options-->
-<!--          />-->
-<!--          <q-select-->
-<!--            dropdown-icon="expand_more"-->
-<!--            v-model="selectedYear"-->
-<!--            :options="yearOptions"-->
-<!--            label="Year"-->
-<!--            style="min-width: 100px"-->
-<!--            outlined-->
-<!--            dense-->
-<!--            emit-value-->
-<!--            map-options-->
-<!--          />-->
           <q-select
             dropdown-icon="expand_more"
             v-model="selectedCurrency"
@@ -145,91 +122,7 @@
       </q-table>
     </q-card>
 
-    <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 400px; border-radius: 8px;">
-        <q-card-section class="bg-primary text-white">
-          <div class="text-h6">Monthly Charges Execution
-            <q-icon
-              name="warning"
-              size="sm"
-              color="white"
-              class="q-ml-sm"
-            />
-          </div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-md">
-          <div class="row items-center q-mb-sm">
-            <q-icon name="calendar_month" color="grey" size="md"/>
-            <span class="q-ml-sm text-body1">
-          Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
-        </span>
-          </div>
-
-          <div class="row items-center q-mb-sm" v-if="selectedCurrency">
-            <q-icon name="payments" color="grey" size="md"/>
-            <span class="q-ml-sm text-body1">
-          Currency: <strong>{{ selectedCurrencyLabel }}</strong>
-        </span>
-          </div>
-
-          <q-separator spaced/>
-
-          <div class="q-mt-md">
-            <q-checkbox
-              v-model="isRecoveryMode"
-              label="Run as Recoveries"
-              color="secondary"
-              class="q-mb-sm"
-            />
-            <div class="text-caption text-grey-7 q-ml-lg">
-              {{ isRecoveryMode ?
-              'Process outstanding charges from previous periods' :
-              'Process regular monthly charges for current period' }}
-            </div>
-          </div>
-
-          <q-separator spaced/>
-
-          <div class="text-subtitle1 q-mt-md">
-            <q-icon name="info" color="warning" class="q-mr-xs"/>
-            This operation will:
-          </div>
-          <ul class="q-pl-md q-mt-sm">
-            <li v-if="isRecoveryMode">Apply recovery charges for outstanding amounts</li>
-            <li v-else>Apply charges to all eligible accounts</li>
-            <li>Generate transaction records</li>
-            <li>Update account balances</li>
-          </ul>
-
-          <div class="text-negative q-mt-md">
-            <q-icon name="error_outline" class="q-mr-xs"/>
-            <strong>Warning:</strong> This action cannot be undone.
-          </div>
-        </q-card-section>
-
-        <q-separator/>
-
-        <q-card-actions align="center" class="q-pa-md">
-          <q-btn
-            no-caps
-            flat
-            label="Cancel"
-            color="grey-7"
-            v-close-popup
-            class="q-px-md"
-          />
-          <q-btn
-            :loading="chargeStore.loading"
-            @click="processSMSCharges"
-            no-caps
-            :label="isRecoveryMode ? 'Run Recoveries' : 'Run Charges'"
-            :color="isRecoveryMode ? 'secondary' : 'positive'"
-            class="q-px-lg"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <charge-process/>
   </q-card>
 </template>
 
@@ -243,6 +136,7 @@ import {useCommonUtility} from "src/utility/common";
 import {useDialogStore} from "stores/dialog-store";
 import ChargeFilter from "components/dialogs/ChargeFilter.vue";
 import {useAdminOfficesStore} from "stores/admin-office-store";
+import ChargeProcess from "components/dialogs/ChargeProcess.vue";
 
 const dialogStore = useDialogStore();
 const chargeStore = useChargeStore();
@@ -291,7 +185,6 @@ const selectedCurrencyLabel = computed(() => {
 const filterStatus = ref<string | null>(null);
 
 onMounted(async () => {
-  await findSmsAlertCurrencies();
   await findChargeHistory();
 })
 
@@ -397,17 +290,17 @@ const getStatusColor = (status: string) => {
 const showDialog = ref(false);
 
 const showConfirmationDialog = () => {
-  if (!selectedCurrency.value) {
-    let resp = {
-      code: '403',
-      message: 'Please select currency'
-    } as Response
-    alerts.showAlert(resp);
-    return;
-  }
+  // if (!selectedCurrency.value) {
+  //   let resp = {
+  //     code: '403',
+  //     message: 'Please select currency'
+  //   } as Response
+  //   alerts.showAlert(resp);
+  //   return;
+  // }
 
-  if (!selectedMonth.value || !selectedYear.value) return
-  showDialog.value = true
+  //if (!selectedMonth.value || !selectedYear.value) return
+  dialogStore.chargeProcess = true
 }
 
 
@@ -425,30 +318,6 @@ async function findChargeHistory() {
       alerts.showAlert(chargeStore.response);
       return;
     }
-  } catch (e) {
-    alerts.showAlert(utility.getError(e));
-  }
-}
-
-async function processSMSCharges() {
-  try {
-
-    let request = {} as ChargeProcessDTO;
-    request.isAutoRecoveryInitiated = isRecoveryMode.value;
-    // Add currency to request if needed
-    if (selectedCurrency.value) {
-      request.currencyId = selectedCurrency.value;
-    }
-    await chargeStore.processSMSCharges(request);
-    if (chargeStore.response.code !== '0') {
-      alerts.showAlert(chargeStore.response);
-      return;
-    }
-    alerts.showAlert(chargeStore.response);
-    showDialog.value = !showDialog.value;
-    utility.saveFile(chargeStore.apiResponse.data.encodedFileData,
-      chargeStore.apiResponse.data.fileName, "PDF");
-
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }

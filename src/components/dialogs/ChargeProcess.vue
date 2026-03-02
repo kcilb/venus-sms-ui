@@ -1,253 +1,239 @@
 <template>
-  <q-dialog v-model="dialogStore.chargeProcess" persistent @hide="onDialogClose">
-    <div>
-      <!-- Tab Navigation -->
+  <q-dialog v-model="dialogStore.chargeProcess" persistent>
+    <q-card class="dialog-card">
+      <!-- Header -->
+      <q-card-section class="dialog-header bg-primary text-white q-pa-md">
+        <div class="row items-center">
+          <q-icon name="payments" size="24px" class="q-mr-sm"/>
+          <div class="col">
+            <div class="text-h6">Charge Processing</div>
+            <div class="text-caption text-white-7">Manage monthly charges and recoveries</div>
+          </div>
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            :disable="
+              progress.status === 'CONNECTED' ||
+              progress.status === 'PENDING' ||
+              progress.status === 'PROCESSING'
+            "
+          />
+        </div>
+      </q-card-section>
+
+      <q-separator/>
+
+      <!-- Tabs -->
       <q-tabs
         v-model="activeTab"
-        class="bg-primary text-white"
-        active-color="white"
-        indicator-color="white"
+        class="tab-header"
+        active-color="primary"
+        indicator-color="primary"
         align="justify"
-        narrow-indicator
+        dense
       >
-        <q-tab name="execution" label="Execute Charges" icon="play_circle"/>
+        <q-tab name="execution" label="Execute" icon="play_circle"/>
         <q-tab
           name="progress"
           label="Progress"
           icon="pending_actions"
           :disable="!hasActiveUploads"
-        >
-          <q-badge v-if="hasActiveUploads" color="red" floating>{{ progress.totalCount }}</q-badge>
-        </q-tab>
+        />
       </q-tabs>
+
+      <q-separator/>
 
       <!-- Tab Panels -->
       <q-tab-panels v-model="activeTab" animated>
-        <!-- Execution Tab Panel -->
-        <q-tab-panel name="execution">
-            <q-card style="min-width: 400px; border-radius: 8px;">
-              <q-card-section class="bg-primary text-white">
-                <div class="text-h6">Monthly Charges Execution
-                  <q-icon
-                    name="warning"
-                    size="sm"
-                    color="white"
-                    class="q-ml-sm"
-                  />
-                </div>
-              </q-card-section>
+        <!-- Execution Panel -->
+        <q-tab-panel name="execution" class="q-pa-md">
+          <!-- Period Selection -->
+          <div class="text-subtitle2 text-grey-8 q-mb-md">Process Details</div>
 
-              <q-card-section class="q-pt-md">
-                <div class="row items-center q-mb-sm">
-                  <q-icon name="calendar_month" color="grey" size="md"/>
-                  <span class="q-ml-sm text-body1">
-                  Processing period: <strong>{{ formatMonthYear(selectedPeriod) }}</strong>
-                </span>
-                </div>
+          <div class="row q-col-gutter-md q-mb-lg">
+            <div class="col-6">
+              <q-card flat bordered class="info-card">
+                <q-card-section class="q-pa-sm">
+                  <div class="text-caption text-grey-6">Period</div>
+                  <div class="text-weight-medium text-primary">{{ formatMonthYear(selectedPeriod) }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-6" v-if="selectedCurrency">
+              <q-card flat bordered class="info-card">
+                <q-card-section class="q-pa-sm">
+                  <div class="text-caption text-grey-6">Currency</div>
+                  <div class="text-weight-medium text-primary">{{ selectedCurrencyLabel }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
 
-                <div class="row items-center q-mb-sm" v-if="selectedCurrency">
-                  <q-icon name="payments" color="grey" size="md"/>
-                  <span class="q-ml-sm text-body1">
-                  Currency: <strong>{{ selectedCurrencyLabel }}</strong>
-                </span>
-                </div>
+          <!-- Mode Selection -->
+          <div class="text-subtitle2 text-grey-8 q-mb-md">Execution Mode</div>
 
-                <q-separator spaced/>
+          <div class="mode-container q-mb-lg">
+            <q-option-group
+              v-model="isRecoveryMode"
+              :options="modeOptions"
+              color="primary"
+              inline
+              dense
+            />
+            <div class="mode-hint q-mt-sm text-caption text-grey-6">
+              <q-icon :name="isRecoveryMode ? 'restore' : 'bolt'" size="14px" class="q-mr-xs"/>
+              {{ recoveryModeDescription }}
+            </div>
+          </div>
 
-                <div class="q-mt-md">
-                  <q-checkbox
-                    v-model="isRecoveryMode"
-                    label="Run as Recoveries"
-                    color="secondary"
-                    class="q-mb-sm"
-                  />
-                  <div class="text-caption text-grey-7 q-ml-lg">
-                    {{
-                      isRecoveryMode ?
-                        'Process outstanding charges from previous periods' :
-                        'Process regular monthly charges for current period'
+          <!-- Warning -->
+          <q-banner class="warning-box q-mb-md rounded-borders">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="warning"/>
+            </template>
+            <span class="text-caption text-weight-medium">This action cannot be undone</span>
+          </q-banner>
+
+          <!-- Actions -->
+          <div class="row justify-end q-gutter-sm">
+            <q-btn flat no-caps label="Cancel" v-close-popup :disable="isProcessing"/>
+            <q-btn
+              no-caps
+              :loading="isProcessing"
+              @click="processSMSCharges"
+              :label="isRecoveryMode ? 'Run Recoveries' : 'Run Charges'"
+              :color="isRecoveryMode ? 'secondary' : 'primary'"
+              :disable="!selectedCurrency"
+            />
+          </div>
+        </q-tab-panel>
+
+        <!-- Progress Panel -->
+        <q-tab-panel name="progress" class="q-pa-none">
+          <div v-if="progress" class="progress-panel">
+            <!-- Status Header -->
+            <div class="status-header q-pa-md" :style="{ backgroundColor: getStatusColor(progress) }">
+              <div class="row items-center">
+                <q-avatar :color="getStatusColor(progress)" text-color="white" size="36px" class="q-mr-sm">
+                  <q-icon :name="getStatusIcon(progress)" size="20px"/>
+                </q-avatar>
+                <div class="col">
+                  <div class="text-white text-weight-medium">Process {{ progress.processId }}</div>
+                  <div class="text-white-7 text-caption">Started {{
+                      formatRelativeTime(progress.metadata?.startTime)
                     }}
                   </div>
                 </div>
-
-                <q-separator spaced/>
-
-                <div class="text-subtitle1 q-mt-md">
-                  <q-icon name="info" color="warning" class="q-mr-xs"/>
-                  This operation will:
-                </div>
-                <ul class="q-pl-md q-mt-sm">
-                  <li v-if="isRecoveryMode">Apply recovery charges for outstanding amounts</li>
-                  <li v-else>Apply charges to all eligible accounts</li>
-                  <li>Generate transaction records</li>
-                  <li>Update account balances</li>
-                </ul>
-
-                <div class="text-negative q-mt-md">
-                  <q-icon name="error_outline" class="q-mr-xs"/>
-                  <strong>Warning:</strong> This action cannot be undone.
-                </div>
-              </q-card-section>
-
-              <q-separator/>
-
-              <q-card-actions align="center" class="q-pa-md">
-                <q-btn
-                  no-caps
-                  flat
-                  label="Cancel"
-                  color="grey-7"
-                  v-close-popup
-                  class="q-px-md"
-                />
-                <q-btn
-                  :loading="isProcessing"
-                  @click="processSMSCharges"
-                  no-caps
-                  :label="isRecoveryMode ? 'Run Recoveries' : 'Run Charges'"
-                  :color="isRecoveryMode ? 'secondary' : 'positive'"
-                  class="q-px-lg"
-                />
-              </q-card-actions>
-            </q-card>
-        </q-tab-panel>
-
-        <!-- Progress Tab Panel -->
-        <q-tab-panel name="progress" class="q-pa-md">
-          <!-- Progress Dialog (Embedded directly) -->
-          <q-card v-if="progress" class="progress-dialog-card">
-            <!-- Header -->
-            <q-card-section class="dialog-header q-pa-md">
-              <div class="row items-center no-wrap">
-                <q-icon :name="getStatusIcon(progress)" size="24px" class="header-icon q-mr-sm" color="white"/>
-                <div class="col">
-                  <div class="text-h6 text-weight-medium">Upload Progress</div>
-                  <div class="text-caption text-white-6">ID: {{ progress.processId }}</div>
-                </div>
-                <q-space/>
                 <q-btn
                   icon="close"
                   flat
                   round
                   dense
+                  color="white"
                   @click="closeProgress"
                   :disable="isProgressInProgress"
                 />
               </div>
-            </q-card-section>
+            </div>
 
-            <q-separator/>
-
-            <!-- Main Content -->
-            <q-card-section class="q-pa-lg">
-              <!-- Progress Type & Status -->
-              <div class="row q-mb-lg">
-                <div class="col-6">
-                  <div class="text-caption text-grey-6 q-mb-xs">Currency</div>
-                  <div class="text-subtitle2">{{ selectedCurrencyLabel }}</div>
-                </div>
-                <div class="col-6 text-right">
-                  <div class="text-caption text-grey-6 q-mb-xs">Status</div>
-                  <q-badge :color="getStatusColor(progress)" :label="progress.status" class="q-px-md"/>
+            <!-- Content -->
+            <div class="q-pa-md">
+              <!-- Status Badge -->
+              <div class="row items-center justify-between q-mb-lg">
+                <q-badge :color="getStatusColor(progress)" class="q-px-md q-py-sm">
+                  <q-icon :name="getStatusIcon(progress)" size="14px" class="q-mr-xs"/>
+                  {{ progress.status }}
+                </q-badge>
+                <div class="flex items-center text-caption text-grey-6">
+                  <q-icon name="payments" size="14px" class="q-mr-xs"/>
+                  {{ selectedCurrencyLabel }}
                 </div>
               </div>
 
-              <!-- Main Progress Bar -->
-              <div class="q-mb-lg">
-                <div class="row justify-between items-center q-mb-sm">
-                  <div class="text-subtitle2">Processing Progress</div>
-                  <div class="text-h6 text-weight-bold">{{ progress.percentage }}%</div>
+              <!-- Stats -->
+              <div class="row q-col-gutter-sm q-mb-lg">
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="text-caption text-grey-6">Total</div>
+                    <div class="stat-number text-primary">{{ formatNumber(progress.totalCount) }}</div>
+                  </div>
                 </div>
-
-                <q-linear-progress
-                  :value="progress.percentage / 100"
-                  stripe
-                  :color="getProgressColor(progress)"
-                  size="20px"
-                  rounded
-                  class="main-progress-bar"
-                >
-                  <template v-slot:default>
-                    <div class="absolute-full flex flex-center">
-                    <span class="text-white text-caption">
-                      {{ progress.processedCount }} / {{ progress.totalCount }}
-                    </span>
-                    </div>
-                  </template>
-                </q-linear-progress>
-              </div>
-
-              <div class="row q-col-gutter-md q-mb-lg">
-                <div class="col-6">
-                  <q-card flat bordered class="info-card">
-                    <q-card-section class="q-pa-sm">
-                      <div class="text-caption text-grey-6">Total Records</div>
-                      <div class="text-subtitle2 text-center">
-                        {{ progress.totalCount }}
-                      </div>
-                    </q-card-section>
-                  </q-card>
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="text-caption text-grey-6">Processed</div>
+                    <div class="stat-number text-positive">{{ formatNumber(progress.processedCount) }}</div>
+                  </div>
                 </div>
-                <div class="col-6">
-                  <q-card flat bordered class="info-card">
-                    <q-card-section class="q-pa-sm">
-                      <div class="text-caption text-grey-6">Processed Records</div>
-                      <div class="text-subtitle2 text-center">
-                        {{ progress.processedCount }}
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </div>
-              </div>
-
-              <div v-if="showReportSection" class="failed-records-section q-mb-lg">
-                <div class="text-subtitle2 q-mb-sm">Execution Report</div>
-
-                <div class="row items-center q-col-gutter-sm">
-                  <div class="col-12 text-left">
-                    <q-btn
-                      color="warning"
-                      icon="download"
-                      label="Download"
-                      @click="onClickDownload"
-                      :disable="!progress.fileInfo"
-                    />
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="text-caption text-grey-6">Pending</div>
+                    <div class="stat-number text-warning">{{ formatNumber(pendingCount) }}</div>
                   </div>
                 </div>
               </div>
 
-              <div v-if="progress.metadata?.startTime" class="text-caption text-grey-6 q-mt-md">
-                <q-icon name="schedule" size="14px" class="q-mr-xs"/>
-                Process started at: {{ formatDateTime(progress.metadata.startTime) }}
+              <!-- Progress Bar -->
+              <div class="q-mb-lg">
+                <div class="row justify-between items-center q-mb-xs">
+                  <span class="text-caption text-grey-6">Progress</span>
+                  <span class="text-weight-bold">{{ progress.percentage }}%</span>
+                </div>
+                <q-linear-progress
+                  :value="progress.percentage / 100"
+                  :color="getProgressColor(progress)"
+                  size="20px"
+                  rounded
+                  stripe
+                />
+                <div class="text-center text-caption text-grey-6 q-mt-xs">
+                  {{ progress.processedCount }} of {{ progress.totalCount }} records
+                </div>
               </div>
-            </q-card-section>
 
-            <!-- Actions -->
-            <q-separator/>
-            <q-card-actions align="right" class="q-pa-md">
-              <q-btn
-                v-if="progress.status === 'COMPLETED' || progress.status === 'FAILED' || progress.status === 'CANCELLED'"
-                label="Close"
-                color="negative"
-                @click="closeProgress"
-              />
-            </q-card-actions>
-          </q-card>
+              <!-- Download -->
+              <q-slide-transition>
+                <div v-if="showReportSection" class="download-box q-mb-lg">
+                  <div class="row items-center justify-between">
+                    <div class="flex items-center">
+                      <q-icon name="check_circle" color="positive" size="20px" class="q-mr-sm"/>
+                      <span class="text-caption">Execution complete</span>
+                    </div>
+                    <q-btn
+                      flat
+                      dense
+                      color="positive"
+                      icon="download"
+                      label="Report"
+                      @click="onClickDownload"
+                      :disable="!progress.fileInfo"
+                      size="sm"
+                      no-caps
+                    />
+                  </div>
+                </div>
+              </q-slide-transition>
+            </div>
+          </div>
 
-          <!-- No Progress Message -->
-          <div v-else class="text-center q-pa-xl">
-            <q-icon name="info" size="48px" color="grey-4"/>
-            <div class="text-h6 text-grey-6 q-mt-md">No Active Progress</div>
-            <div class="text-caption text-grey-5">Start a charge execution to see progress here</div>
+          <!-- Empty State -->
+          <div v-else class="empty-state q-pa-xl text-center">
+            <q-icon name="pending_actions" size="48px" color="grey-4"/>
+            <div class="text-h6 text-grey-7 q-mt-sm">No Active Process</div>
+            <div class="text-caption text-grey-6 q-mb-md">Start a charge execution to see progress</div>
+            <q-btn flat color="primary" label="Go to Execute" @click="activeTab = 'execution'" no-caps/>
           </div>
         </q-tab-panel>
       </q-tab-panels>
-    </div>
+    </q-card>
   </q-dialog>
 </template>
 
+
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, ref, watch, onUnmounted, onMounted} from "vue";
 import {useDialogStore} from "stores/dialog-store";
 import {ChargeProcessDTO, ProgressDTO, SmsAlertCurrency} from "components/models";
 import moment from "moment/moment";
@@ -257,7 +243,6 @@ import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
 import {useSseListener} from "src/utility/sse-listener";
 
-
 const dialogStore = useDialogStore();
 const adminStore = useAdminOfficesStore();
 const chargeStore = useChargeStore();
@@ -265,46 +250,65 @@ const alerts = useAlerts();
 const utility = useCommonUtility();
 const sse = useSseListener();
 
+// Mode options
+const modeOptions = [
+  {label: 'Regular Charges', value: false},
+  {label: 'Recovery Mode', value: true}
+];
 
-watch(
-  () => dialogStore.chargeProcess,
-  async (newValue) => {
-    if (!newValue) return;
-    await findSmsAlertCurrencies();
-  },
-  {immediate: true}
-);
-
-
+// State
 const activeTab = ref('execution');
-
-const emit = defineEmits<{
-  close: [];
-}>();
-
-const onDialogClose = () => {
-  emit('close');
-};
-
-const formatMonthYear = (period: string) => {
-  return moment(period, 'YYYY-MM').format('MMMM YYYY')
-}
-
-const formatDateTime = (timestamp: string): string => {
-  if (!timestamp) return 'N/A';
-  try {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  } catch {
-    return 'Invalid date';
-  }
-};
-
 const isProcessing = ref(false);
 const isRecoveryMode = ref(false);
-const selectedMonth = ref<number | null>(null)
-const selectedYear = ref<number | null>(null)
-const selectedCurrency = ref<number | null>(null)
+const selectedMonth = ref<number | null>(null);
+const selectedYear = ref<number | null>(null);
+const selectedCurrency = ref<number | null>(null);
+
+// Initialize dates
+const currentDate = moment();
+selectedMonth.value = currentDate.month() + 1;
+selectedYear.value = currentDate.year();
+
+// Computed properties
+const selectedPeriod = computed(() => {
+  if (!selectedMonth.value || !selectedYear.value) return '';
+  return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`;
+});
+
+const selectedCurrencyLabel = computed(() => {
+  if (!selectedCurrency.value) return 'All Currencies';
+  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === selectedCurrency.value);
+  return currency ? currency.crncyNm : selectedCurrency.value;
+});
+
+const currencyOptions = computed(() => {
+  return adminStore.currencyList.filter(f => f.status == "A");
+});
+
+const progress = computed(() => sse.progressUpdate.value);
+const hasActiveUploads = computed(() => progress.value?.totalCount > 0);
+const isProgressInProgress = computed(() => ['PENDING', 'PROCESSING', 'CONNECTED'].includes(progress.value?.status));
+const showReportSection = computed(() => progress.value?.status === 'COMPLETED');
+
+const recoveryModeDescription = computed(() =>
+  isRecoveryMode.value
+    ? 'Processing outstanding charges from previous periods'
+    : 'Processing regular monthly charges for current period'
+);
+
+const pendingCount = computed(() => {
+  if (!progress.value) return 0;
+
+  // Convert to numbers, handling potential strings
+  const total = Number(progress.value.totalCount) || 0;
+  const processed = Number(progress.value.processedCount) || 0;
+
+  // Calculate and validate
+  const result = total - processed;
+
+  // Return 0 if result is invalid
+  return isNaN(result) || result < 0 ? 0 : result;
+});
 
 // Status configuration
 const statusConfig = {
@@ -316,71 +320,55 @@ const statusConfig = {
   CANCELLED: {color: 'orange', icon: 'cancel', progressColor: 'warning'},
 } as const;
 
-// Progress tracking
-const hasActiveUploads = computed(() => {
-  return progress.value.totalCount > 0;
-});
-const isProgressInProgress = computed(() => {
-  const status = progress.value?.status;
-  return status === 'PENDING' || status === 'PROCESSING' || status === 'CONNECTED';
-});
+const getStatusColor = (progress: ProgressDTO) => statusConfig[progress?.status]?.color || 'info';
+const getProgressColor = (progress: ProgressDTO) => statusConfig[progress?.status]?.progressColor || 'info';
+const getStatusIcon = (progress: ProgressDTO) => statusConfig[progress?.status]?.icon || 'info';
 
-const currentDate = moment()
-const currentMonth = currentDate
-selectedMonth.value = currentMonth.month() + 1 // Moment months are 0-11
-selectedYear.value = currentMonth.year()
+// Helper functions
+const formatMonthYear = (period: string) => moment(period, 'YYYY-MM').format('MMMM YYYY');
+const formatRelativeTime = (timestamp: string) => timestamp ? moment(timestamp).fromNow() : 'N/A';
 
-const selectedPeriod = computed(() => {
-  if (!selectedMonth.value || !selectedYear.value) return ''
-  return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
+// Watchers
+watch(
+  () => dialogStore.chargeProcess,
+  async (newValue) => {
+    if (newValue) {
+      await findSmsAlertCurrencies();
+      activeTab.value = 'execution';
+    }
+  },
+  {immediate: true}
+);
+
+watch(() => activeTab, (tab) => {
+  if (tab.value == 'progress') return;
+  sse.progressUpdate.value = {} as ProgressDTO;
 })
 
-// Get the label for the selected currency
-const selectedCurrencyLabel = computed(() => {
-  if (!selectedCurrency.value) return 'All Currencies'
-  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === selectedCurrency.value)
-  return currency ? currency.crncyNm : selectedCurrency.value
-})
-
-
-const getStatusColor = (progress: ProgressDTO) => {
-  return statusConfig[progress.status]?.color || 'grey';
-};
-
-const getProgressColor = (progress: ProgressDTO) => {
-  return statusConfig[progress.status]?.progressColor || 'grey';
-};
-
-const getStatusIcon = (progress: ProgressDTO) => {
-  return statusConfig[progress.status]?.icon || 'info';
-};
-
-const currencyOptions = computed(() => {
-  return adminStore.currencyList.filter(f => f.status == "A")
-})
-
-const showReportSection = computed(() => {
-  return progress.value?.status === 'COMPLETED';
-})
 
 watch(selectedCurrency, async (newValue) => {
-  if (!newValue) return;
-  await sse.connectSse(newValue?.toString());
-})
+  if (newValue) {
+    await sse.connectSse(newValue?.toString());
+  }
+});
+
+// Cleanup
+onUnmounted(() => {
+  sse.disconnect();
+});
 
 
-const progress = computed(() => {
-  return sse.progressUpdate.value;
-})
+const formatNumber = (num: any) => {
+  if (num == null || isNaN(num)) return '0';
+  return num.toLocaleString();
+};
+
+const emit = defineEmits<{ close: [] }>();
+const onDialogClose = () => emit('close');
 
 async function findSmsAlertCurrencies() {
   try {
-    let request = {} as SmsAlertCurrency;
-    await adminStore.findSmsAlertCurrencies(request);
-    if (adminStore.response.code !== '0') {
-      alerts.showAlert(adminStore.response);
-      return;
-    }
+    await adminStore.findSmsAlertCurrencies({} as SmsAlertCurrency);
   } catch (e) {
     alerts.showAlert(utility.getError(e));
   }
@@ -388,44 +376,69 @@ async function findSmsAlertCurrencies() {
 
 async function processSMSCharges() {
   try {
+    isProcessing.value = true;
 
-    let request = {} as ChargeProcessDTO;
-    request.isAutoRecoveryInitiated = isRecoveryMode.value;
-    if (selectedCurrency.value) {
-      request.currencyId = selectedCurrency.value;
-    }
+    const request = {
+      isAutoRecoveryInitiated: isRecoveryMode.value,
+      currencyId: selectedCurrency.value,
+    } as ChargeProcessDTO;
+
     await chargeStore.processSMSCharges(request);
-    if (chargeStore.response.code !== '0') {
-      alerts.showAlert(chargeStore.response);
-      return;
-    }
-    alerts.showAlert(chargeStore.response);
-    onClickDownload();
 
+    if (chargeStore.response.code === '0') {
+      alerts.showAlert(chargeStore.response);
+      activeTab.value = 'progress';
+    } else {
+      alerts.showAlert(chargeStore.response);
+    }
   } catch (e) {
     alerts.showAlert(utility.getError(e));
+  } finally {
+    isProcessing.value = false;
   }
 }
 
+// async function uploadTest() {
+//   try {
+//     isProcessing.value = true;
+//     sse.progressUpdate.value = {} as ProgressDTO;
+//
+//     const request = {
+//       processId: "1"
+//     } as ProgressDTO;
+//
+//     await chargeStore.uploadTest(request);
+//     if (chargeStore.response.code === '0') {
+//       alerts.showAlert(chargeStore.response);
+//       activeTab.value = 'progress';
+//     } else {
+//       alerts.showAlert(chargeStore.response);
+//     }
+//   } catch (e) {
+//     alerts.showAlert(utility.getError(e));
+//   } finally {
+//     isProcessing.value = false;
+//   }
+// }
+
 const onClickDownload = () => {
-  if (!sse.progressUpdate.value.fileInfo) return;
+  const fileInfo = Object.fromEntries(sse.progressUpdate.value?.fileInfo);
+  if (!fileInfo) return;
 
   try {
-    const fileData = sse.progressUpdate.value.fileInfo.get("encodedFileData");
-    const fileName = sse.progressUpdate.value.fileInfo.get('fileName');
+    const fileData = fileInfo?.encodedFileData;
+    const fileName = fileInfo?.fileName;
 
-    if (!fileData || !fileName) {
-      alerts.showAlert({code: '-99', message: 'File data or name is missing'});
-      return;
+    if (fileData && fileName) {
+      const src = `data:application/octet-stream;base64,${fileData}`;
+      const link = document.createElement('a');
+      link.href = src;
+      link.download = fileName;
+      link.click();
+      link.remove();
     }
-
-    const src = `data:application/octet-stream;base64,${fileData}`;
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = fileName;
-    link.click();
-    link.remove();
   } catch (e) {
+    console.log(e);
     alerts.showAlert(utility.getError(e));
   }
 };
@@ -434,41 +447,113 @@ function closeProgress() {
   if (!isProgressInProgress.value) {
     activeTab.value = 'execution';
   }
+  sse.disconnect();
   emit('close');
-};
-
-
+}
 </script>
 
 
 <style scoped>
-.progress-dialog-card {
-  border-radius: 10px;
+.dialog-card {
+  min-width: 480px;
+  max-width: 560px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .dialog-header {
-  background: linear-gradient(135deg, #2a93bc 0%, #1a6a8a 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--q-primary) 0%, #1565C0 100%);
 }
 
-.header-icon {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+.tab-header {
+  background: white;
 }
 
-.main-progress-bar {
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
+/* Info Cards */
 .info-card {
+  background: #f8fafc;
   border-radius: 8px;
-  background: #f8f9fa;
+  border: 1px solid #e2e8f0;
 }
 
-.failed-records-section {
-  padding: 16px;
-  background: #fef8e6;
+/* Mode Container */
+.mode-container {
+  background: #f8fafc;
   border-radius: 8px;
-  border: 1px solid #ffc10720;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.mode-hint {
+  padding: 6px 8px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid var(--q-primary);
+}
+
+/* Summary Box */
+.summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* Warning Box */
+.warning-box {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+}
+
+/* Progress Panel */
+.status-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 4px;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.download-box {
+  background: #e8f5e9;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #c8e6c9;
+}
+
+.timeline-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* Empty State */
+.empty-state {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 599px) {
+  .dialog-card {
+    min-width: 90vw;
+    margin: 16px;
+  }
+
+  .mode-options :deep(.q-radio) {
+    margin-bottom: 8px;
+  }
 }
 </style>

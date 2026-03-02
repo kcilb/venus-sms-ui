@@ -12,7 +12,7 @@
           <div class="row justify-center q-col-gutter-md col-lg-12 col-md-12 col-sm-12">
             <div class="col-8">
               <div class="row justify-end q-mb-md">
-                <q-btn @click="onClickCharges" no-caps color="primary">Configure Charges</q-btn>
+                <q-btn :disable="form.smsAlertCrncyId == undefined" @click="onClickCharges" no-caps color="primary">Configure Charges</q-btn>
               </div>
               <div class="row q-col-gutter-md col-lg-12 col-md-12 col-sm-12">
                 <div class="col-md-6">

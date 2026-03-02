@@ -9,7 +9,7 @@ import {
   ChangeRequest,
   Roles,
   ChargeProcessDTO,
-  SmsChargeLog
+  SmsChargeLog, ProgressDTO
 } from "components/models";
 import {useCommonUtility} from "src/utility/common";
 
@@ -37,6 +37,26 @@ export const useChargeStore = defineStore('charges', {
         }).then(response => {
           this.apiResponse = response.data;
           this.response = utility.convertResponseMessageObj(this.apiResponse);
+        });
+      } catch (err) {
+        throw err;
+      } finally {
+        setTimeout(() => {
+          this.loading = false;
+        }, 3000);
+      }
+    },
+
+    async uploadTest(request: ProgressDTO) {
+      this.apiResponse = {} as any;
+      this.loading = true;
+      try {
+        await apiClient.post('events/uploadTest', request, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(response => {
+          this.response = response.data;
         });
       } catch (err) {
         throw err;

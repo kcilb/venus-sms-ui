@@ -1,5 +1,5 @@
 {
-  "baseurl": "https://172.16.13.6:8081/apis/v2/",
+  "baseurl": "http://localhost:8081/apis/v2",
   "timeout": 30000,
   "endpoints": {
     "login": "/auth/login",
