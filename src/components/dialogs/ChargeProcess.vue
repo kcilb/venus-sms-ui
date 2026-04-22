@@ -398,29 +398,6 @@ async function processSMSCharges() {
   }
 }
 
-// async function uploadTest() {
-//   try {
-//     isProcessing.value = true;
-//     sse.progressUpdate.value = {} as ProgressDTO;
-//
-//     const request = {
-//       processId: "1"
-//     } as ProgressDTO;
-//
-//     await chargeStore.uploadTest(request);
-//     if (chargeStore.response.code === '0') {
-//       alerts.showAlert(chargeStore.response);
-//       activeTab.value = 'progress';
-//     } else {
-//       alerts.showAlert(chargeStore.response);
-//     }
-//   } catch (e) {
-//     alerts.showAlert(utility.getError(e));
-//   } finally {
-//     isProcessing.value = false;
-//   }
-// }
-
 const onClickDownload = () => {
   const fileInfo = Object.fromEntries(sse.progressUpdate.value?.fileInfo);
   if (!fileInfo) return;
