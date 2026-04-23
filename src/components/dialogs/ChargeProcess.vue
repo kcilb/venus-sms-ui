@@ -62,7 +62,7 @@
                 </q-card-section>
               </q-card>
             </div>
-            <div class="col-6" v-if="selectedCurrency">
+            <div class="col-6" v-if="props.selectedCurrency">
               <q-card flat bordered class="info-card">
                 <q-card-section class="q-pa-sm">
                   <div class="text-caption text-grey-6">Currency</div>
@@ -106,7 +106,7 @@
               @click="processSMSCharges"
               :label="isRecoveryMode ? 'Run Recoveries' : 'Run Charges'"
               :color="isRecoveryMode ? 'secondary' : 'primary'"
-              :disable="!selectedCurrency"
+              :disable="!props.selectedCurrency"
             />
           </div>
         </q-tab-panel>
@@ -243,6 +243,10 @@ import {useAlerts} from "src/utility/alerts";
 import {useCommonUtility} from "src/utility/common";
 import {useSseListener} from "src/utility/sse-listener";
 
+const props = defineProps<{
+  selectedCurrency: number | null
+}>();
+
 const dialogStore = useDialogStore();
 const adminStore = useAdminOfficesStore();
 const chargeStore = useChargeStore();
@@ -262,7 +266,6 @@ const isProcessing = ref(false);
 const isRecoveryMode = ref(false);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<number | null>(null);
-const selectedCurrency = ref<number | null>(null);
 
 // Initialize dates
 const currentDate = moment();
@@ -276,9 +279,9 @@ const selectedPeriod = computed(() => {
 });
 
 const selectedCurrencyLabel = computed(() => {
-  if (!selectedCurrency.value) return 'All Currencies';
-  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === selectedCurrency.value);
-  return currency ? currency.crncyNm : selectedCurrency.value;
+  if (!props.selectedCurrency) return 'All Currencies';
+  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === props.selectedCurrency);
+  return currency ? currency.crncyNm : props.selectedCurrency;
 });
 
 const currencyOptions = computed(() => {
@@ -346,9 +349,11 @@ watch(() => activeTab, (tab) => {
 })
 
 
-watch(selectedCurrency, async (newValue) => {
+watch(() => props.selectedCurrency, async (newValue) => {
   if (newValue) {
     await sse.connectSse(newValue?.toString());
+  } else {
+    sse.disconnect();
   }
 });
 
@@ -380,7 +385,7 @@ async function processSMSCharges() {
 
     const request = {
       isAutoRecoveryInitiated: isRecoveryMode.value,
-      currencyId: selectedCurrency.value,
+      currencyId: props.selectedCurrency,
     } as ChargeProcessDTO;
 
     await chargeStore.processSMSCharges(request);

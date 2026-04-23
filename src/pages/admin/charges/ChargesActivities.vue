@@ -122,7 +122,7 @@
       </q-table>
     </q-card>
 
-    <charge-process/>
+    <charge-process :selectedCurrency="selectedCurrency" />
   </q-card>
 </template>
 
@@ -144,22 +144,12 @@ const alerts = useAlerts();
 const utility = useCommonUtility();
 const adminStore = useAdminOfficesStore();
 
-const isRecoveryMode = ref(false);
 const selectedMonth = ref<number | null>(null)
 const selectedYear = ref<number | null>(null)
 const selectedCurrency = ref<number | null>(null) // Added currency ref
 
 
-const monthOptions = Array.from({length: 12}, (_, i) => ({
-  label: moment().month(i).format('MMMM'), // Full month name
-  value: i + 1 // Months 1-12
-}))
-
 const currentYear = moment().year()
-const yearOptions = Array.from({length: 5}, (_, i) => ({
-  label: String(currentYear - i),
-  value: currentYear - i
-}))
 
 const currentDate = moment()
 const currentMonth = currentDate
@@ -170,21 +160,10 @@ const formatMonthYear = (period: string) => {
   return moment(period, 'YYYY-MM').format('MMMM YYYY')
 }
 
-const selectedPeriod = computed(() => {
-  if (!selectedMonth.value || !selectedYear.value) return ''
-  return `${selectedYear.value}-${String(selectedMonth.value).padStart(2, '0')}`
-})
-
-// Get the label for the selected currency
-const selectedCurrencyLabel = computed(() => {
-  if (!selectedCurrency.value) return 'All Currencies'
-  const currency = currencyOptions.value.find(c => c.smsAlertCrncyId === selectedCurrency.value)
-  return currency ? currency.crncyNm : selectedCurrency.value
-})
-
 const filterStatus = ref<string | null>(null);
 
 onMounted(async () => {
+  await findSmsAlertCurrencies();
   await findChargeHistory();
 })
 
@@ -287,20 +266,17 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const showDialog = ref(false);
-
 const showConfirmationDialog = () => {
-  // if (!selectedCurrency.value) {
-  //   let resp = {
-  //     code: '403',
-  //     message: 'Please select currency'
-  //   } as Response
-  //   alerts.showAlert(resp);
-  //   return;
-  // }
+  if (!selectedCurrency.value) {
+    let resp = {
+      code: '403',
+      message: 'Please select currency'
+    } as Response
+    alerts.showAlert(resp);
+    return;
+  }
 
-  //if (!selectedMonth.value || !selectedYear.value) return
-  dialogStore.chargeProcess = true
+  dialogStore.chargeProcess = true;
 }
 
 
@@ -347,6 +323,18 @@ function onClickFilter() {
     endDate: formState.value.endDate,
     currencyId: selectedCurrency.value
   };
+}
+
+async function findSmsAlertCurrencies() {
+  try {
+    await adminStore.findSmsAlertCurrencies({} as SmsAlertCurrency);
+    if (chargeStore.response.code !== '0') {
+      alerts.showAlert(chargeStore.response);
+      return;
+    }
+  } catch (e) {
+    alerts.showAlert(utility.getError(e));
+  }
 }
 </script>
 
