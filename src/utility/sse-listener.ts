@@ -8,11 +8,21 @@ export function useSseListener() {
   const status = ref<'connected' | 'disconnected' | 'error' | 'connecting'>('disconnected');
   const controller = ref<AbortController | null>(null);
   const errorMessage = ref<string>('');
+  const connectedProcessId = ref<string | null>(null);
 
   const connectSse = async (processId: string) => {
-    if (status.value === 'connected') {
-      console.warn('Already connected to SSE');
+    if (!processId) {
       return;
+    }
+
+    if (status.value === 'connected' && connectedProcessId.value === processId) {
+      console.warn('Already connected to SSE for processId');
+      return;
+    }
+
+    if (controller.value) {
+      controller.value.abort();
+      controller.value = null;
     }
 
     status.value = 'connecting';
@@ -23,12 +33,8 @@ export function useSseListener() {
 
     const url = `${config.baseurl}/events/stream-progress/${processId}`;
 
-    // Clean up previous connection
-    if (controller.value) {
-      controller.value.abort();
-    }
-
     controller.value = new AbortController();
+    connectedProcessId.value = processId;
 
     try {
       await fetchEventSource(url, {
@@ -59,6 +65,7 @@ export function useSseListener() {
 
           try {
             progressUpdate.value = JSON.parse(msg.data);
+            console.warn('Raw message data:', msg.data);
           } catch (e) {
             console.error('Failed to parse progress data:', e);
             // Optionally keep the raw data for debugging
@@ -71,6 +78,7 @@ export function useSseListener() {
             status.value = 'disconnected';
             console.log('SSE connection closed');
           }
+          connectedProcessId.value = null;
         },
 
         onerror(err:any) {
@@ -85,6 +93,7 @@ export function useSseListener() {
     } catch (err) {
       status.value = 'error';
       errorMessage.value = err instanceof Error ? err.message : 'Connection failed';
+      connectedProcessId.value = null;
       console.error('Failed to establish SSE connection:', err);
     }
   };
@@ -94,6 +103,7 @@ export function useSseListener() {
       controller.value.abort();
       controller.value = null;
     }
+    connectedProcessId.value = null;
     status.value = 'disconnected';
     errorMessage.value = '';
   };

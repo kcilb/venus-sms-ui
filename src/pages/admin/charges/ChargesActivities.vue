@@ -329,7 +329,6 @@ async function findSmsAlertCurrencies() {
   try {
     await adminStore.findSmsAlertCurrencies({} as SmsAlertCurrency);
     if (chargeStore.response.code !== '0') {
-      alerts.showAlert(chargeStore.response);
       return;
     }
   } catch (e) {

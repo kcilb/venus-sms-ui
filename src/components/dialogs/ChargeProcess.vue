@@ -343,19 +343,19 @@ watch(
   {immediate: true}
 );
 
-watch(() => activeTab, (tab) => {
-  if (tab.value == 'progress') return;
+watch(activeTab, (tab) => {
+  if (tab === 'progress') return;
   sse.progressUpdate.value = {} as ProgressDTO;
 })
 
-
-watch(() => props.selectedCurrency, async (newValue) => {
-  if (newValue) {
-    await sse.connectSse(newValue?.toString());
-  } else {
-    sse.disconnect();
-  }
-});
+//
+// watch(() => props.selectedCurrency, async (newValue) => {
+//   if (newValue) {
+//     void sse.connectSse(newValue.toString());
+//   } else {
+//     sse.disconnect();
+//   }
+// });
 
 // Cleanup
 onUnmounted(() => {
@@ -379,32 +379,37 @@ async function findSmsAlertCurrencies() {
   }
 }
 
-async function processSMSCharges() {
-  try {
-    isProcessing.value = true;
-
-    const request = {
-      isAutoRecoveryInitiated: isRecoveryMode.value,
-      currencyId: props.selectedCurrency,
-    } as ChargeProcessDTO;
-
-    await chargeStore.processSMSCharges(request);
-
-    if (chargeStore.response.code === '0') {
-      alerts.showAlert(chargeStore.response);
-      activeTab.value = 'progress';
-    } else {
-      alerts.showAlert(chargeStore.response);
-    }
-  } catch (e) {
-    alerts.showAlert(utility.getError(e));
-  } finally {
-    isProcessing.value = false;
-  }
-}
+// async function processSMSCharges() {
+//   try {
+//     isProcessing.value = true;
+//
+//     const request = {
+//       isAutoRecoveryInitiated: isRecoveryMode.value,
+//       currencyId: props.selectedCurrency,
+//     } as ChargeProcessDTO;
+//
+//     await chargeStore.processSMSCharges(request);
+//     if (chargeStore.response.code === '0') {
+//       const processId = props.selectedCurrency?.toString();
+//       if (processId) {
+//         void sse.connectSse(processId);
+//       }
+//       alerts.showAlert(chargeStore.response);
+//       activeTab.value = 'progress';
+//     } else {
+//       alerts.showAlert(chargeStore.response);
+//     }
+//   } catch (e) {
+//     console.log(e);
+//     alerts.showAlert(utility.getError(e));
+//   } finally {
+//     isProcessing.value = false;
+//   }
+// }
 
 const onClickDownload = () => {
-  const fileInfo = Object.fromEntries(sse.progressUpdate.value?.fileInfo);
+  const rawFileInfo = sse.progressUpdate.value?.fileInfo;
+  const fileInfo = rawFileInfo instanceof Map ? Object.fromEntries(rawFileInfo) : rawFileInfo;
   if (!fileInfo) return;
 
   try {
@@ -432,6 +437,56 @@ function closeProgress() {
   sse.disconnect();
   emit('close');
 }
+
+function getProcessIdFromResponse(response: unknown): string | null {
+  if (!response || typeof response !== 'object') return null;
+
+  const payload = response as Record<string, unknown>;
+  const direct = payload.processId;
+  if (typeof direct === 'string' || typeof direct === 'number') {
+    return String(direct);
+  }
+
+  const nested = payload.data;
+  if (nested && typeof nested === 'object') {
+    const nestedProcessId = (nested as Record<string, unknown>).processId;
+    if (typeof nestedProcessId === 'string' || typeof nestedProcessId === 'number') {
+      return String(nestedProcessId);
+    }
+  }
+
+  return null;
+}
+
+
+async function processSMSCharges() {
+  try {
+    isProcessing.value = true;
+
+    const request = {
+      processId: props.selectedCurrency,
+    } as unknown as ProgressDTO;
+
+    await chargeStore.uploadTest(request);
+
+    if (chargeStore.response.code === '0') {
+      const processId = getProcessIdFromResponse(chargeStore.response) ?? props.selectedCurrency?.toString();
+      if (processId) {
+        void sse.connectSse(processId);
+      }
+      alerts.showAlert(chargeStore.response);
+      activeTab.value = 'progress';
+    } else {
+      alerts.showAlert(chargeStore.response);
+    }
+  } catch (e) {
+    console.log(e);
+    alerts.showAlert(utility.getError(e));
+  } finally {
+    isProcessing.value = false;
+  }
+}
+
 </script>
 
 

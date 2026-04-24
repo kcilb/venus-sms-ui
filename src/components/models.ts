@@ -42,7 +42,7 @@ export interface ChangeRequest {
 
 export interface ProgressDTO {
   processId: string;
-  fileInfo: Map<string,string>;
+  fileInfo: Map<string, string> | Record<string, string>;
   processedCount: number;
   totalCount: number;
   percentage: number;
